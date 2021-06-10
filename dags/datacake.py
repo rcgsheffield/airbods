@@ -12,6 +12,8 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
 def bulk_load_values(*args, task_instance, **kwargs):
     data = task_instance.xcom_pull('all_devices_history')
 
+    # https://hakibenita.com/fast-load-data-python-postgresql#execute-values-from-iterator-with-page-size
+
 
 with airflow.DAG(
         dag_id='datacake',
