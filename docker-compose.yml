@@ -3,44 +3,56 @@ version: "3.8"
 # Common airflow settings (using YAML X properties)
 # https://airflow.apache.org/docs/apache-airflow/stable/start/docker.html
 x-airflow-common: &airflow-common
-  image: apache/airflow:2.1.0
+  # Add extra Python packages
+  build:
+    context: .
+    args:
+      ADDITIONAL_PYTHON_DEPS: "apache-airflow-providers-postgres==1.0.*"
   environment: &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
     AIRFLOW__CORE__SQL_ALCHEMY_CONN_CMD: "cat /run/secrets/sql_alchemy_conn"
     AIRFLOW__CELERY__RESULT_BACKEND_CMD: "cat /run/secrets/result_backend"
     AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
     AIRFLOW_VAR_DATACAKE_WORKSPACE_ID: "0bdfb2eb-6531-4afb-a842-ce6b51d3c980"
+  env_file:
+    ./secrets/.env
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
     - ./plugins:/opt/airflow/plugins
     - ./tests:/opt/airflow/tests
-  user: "50000:0"
+  user: "50000:50000"
   depends_on:
     redis:
       condition: service_healthy
-    postgres:
+    backend:
       condition: service_healthy
+
 services:
   # Research data storage
-  db:
-    image: mysql:8.0
+  database:
+    image: postgres:13.3
     environment:
-      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root
+      POSTGRES_USER: airbods
+      POSTGRES_PASSWORD_FILE: /run/secrets/database
+      POSTGRES_DB: airbods
     ports:
-      - 3306:3306
+      - 5432:5432
     secrets:
-      - mysql_root
+      - database
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "airbods" ]
+    restart: always
 
   # Airflow
-  postgres:
+  backend:
     image: postgres:13.3
     environment:
       POSTGRES_USER: airflow
-      POSTGRES_PASSWORD_FILE: /run/secrets/postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/backend
       POSTGRES_DB: airflow
     secrets:
-      - postgres
+      - backend
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "airflow" ]
     restart: always
@@ -62,6 +74,7 @@ services:
     secrets:
       - sql_alchemy_conn
       - result_backend
+    user: "50000:0"
 
   scheduler:
     <<: *airflow-common
@@ -104,10 +117,10 @@ services:
       test: [ "CMD", "curl", "--fail", "http://localhost:5555/" ]
 
 secrets:
-  mysql_root:
-    file: secrets/mysql_root.txt
-  postgres:
-    file: secrets/postgres.txt
+  database:
+    file: secrets/database.txt
+  backend:
+    file: secrets/backend.txt
   result_backend:
     file: secrets/result_backend.txt
   sql_alchemy_conn:
