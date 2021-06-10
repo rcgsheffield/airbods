@@ -9,6 +9,7 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__SQL_ALCHEMY_CONN_CMD: "cat /run/secrets/sql_alchemy_conn"
     AIRFLOW__CELERY__RESULT_BACKEND_CMD: "cat /run/secrets/result_backend"
     AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
+    AIRFLOW_VAR_DATACAKE_WORKSPACE_ID: "0bdfb2eb-6531-4afb-a842-ce6b51d3c980"
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
