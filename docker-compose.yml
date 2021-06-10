@@ -1,0 +1,115 @@
+version: "3.8"
+
+# Common airflow settings (using YAML X properties)
+# https://airflow.apache.org/docs/apache-airflow/stable/start/docker.html
+x-airflow-common: &airflow-common
+  image: apache/airflow:2.1.0
+  environment: &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN_CMD: "cat /run/secrets/sql_alchemy_conn"
+    AIRFLOW__CELERY__RESULT_BACKEND_CMD: "cat /run/secrets/result_backend"
+    AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./logs:/opt/airflow/logs
+    - ./plugins:/opt/airflow/plugins
+    - ./tests:/opt/airflow/tests
+  user: "50000:0"
+  depends_on:
+    redis:
+      condition: service_healthy
+    postgres:
+      condition: service_healthy
+services:
+  # Research data storage
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root
+    ports:
+      - 3306:3306
+    secrets:
+      - mysql_root
+
+  # Airflow
+  postgres:
+    image: postgres:13.3
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres
+      POSTGRES_DB: airflow
+    secrets:
+      - postgres
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "airflow" ]
+    restart: always
+
+  redis:
+    image: redis:6.2
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+    restart: always
+
+  webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - 8080:8080
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:8080/health" ]
+    restart: always
+    secrets:
+      - sql_alchemy_conn
+      - result_backend
+
+  scheduler:
+    <<: *airflow-common
+    command: scheduler
+    restart: always
+    secrets:
+      - sql_alchemy_conn
+      - result_backend
+
+  worker:
+    <<: *airflow-common
+    command: celery worker
+    secrets:
+      - sql_alchemy_conn
+      - result_backend
+    restart: always
+
+  airflow-init:
+    <<: *airflow-common
+    command: version
+    environment:
+      <<: *airflow-common-env
+      _AIRFLOW_DB_UPGRADE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: airflow
+      _AIRFLOW_WWW_USER_PASSWORD_CMD: "cat /run/secrets/airflow"
+    secrets:
+      - airflow
+      - sql_alchemy_conn
+
+  flower:
+    image: mher/flower:0.9.7
+    command: celery flower
+    ports:
+      - 5555:5555
+    environment:
+      CELERY_BROKER_URL: redis://:@redis:6379/0
+    restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:5555/" ]
+
+secrets:
+  mysql_root:
+    file: secrets/mysql_root.txt
+  postgres:
+    file: secrets/postgres.txt
+  result_backend:
+    file: secrets/result_backend.txt
+  sql_alchemy_conn:
+    file: secrets/sql_alchemy_conn.txt
+  airflow:
+    file: secrets/airflow.txt
