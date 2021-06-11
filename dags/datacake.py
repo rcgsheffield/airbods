@@ -29,12 +29,13 @@ with airflow.DAG(
         query=textwrap.dedent("""
         query {{ '{' }}
           allDevices(inWorkspace: "{{ var.value.datacake_workspace_id }}") {{ '{' }}
+            id
             history(
               fields: ["CO2","TEMPERATURE","LORAWAN_SNR","LORAWAN_DATARATE","LORAWAN_RSSI","AIR_QUALITY","HUMIDITY"]
               timerangestart: "{{ ts }}"
               timerangeend: "{{ next_execution_date }}"
               resolution: "raw"
-            ) 
+            )
           {{ '}' }}
         {{ '}' }}
         """),

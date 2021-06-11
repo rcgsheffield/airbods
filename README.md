@@ -1,5 +1,18 @@
 # Airbods
 
+Data pipelines and data storage for Airbods air measurement experiments.
+
+# Usage
+
+```bash
+# Build images (and update remote images)
+docker-compose build --pull
+# Start services
+docker-compose up -d --remove-orphans
+# View status
+docker-compose ps
+```
+
 # Testing
 
 See [Testing a DAG](https://airflow.apache.org/docs/apache-airflow/stable/best-practices.html#testing-a-dag).
