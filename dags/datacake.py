@@ -16,6 +16,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 def flatten_history(devices: Iterable[dict]) -> Iterable[dict]:
+    """
+    Process device historical data into rows
+    """
     row_count = 0
     for device in devices:
         for row in json.loads(device.pop('history')):
@@ -27,11 +30,10 @@ def flatten_history(devices: Iterable[dict]) -> Iterable[dict]:
 
 def bulk_load_values(*args, task_instance, **kwargs):
     # Get result of previous task
-    response = task_instance.xcom_pull('all_devices_history')
-    response_data = json.loads(response)
+    devices = task_instance.xcom_pull('all_devices_history')
 
     # Convert GraphQL response to data rows
-    rows = flatten_history(response_data['data']['allDevices'])
+    rows = flatten_history(devices)
 
     # Connect to target database
     hook = PostgresHook('database')
@@ -88,7 +90,7 @@ with airflow.DAG(
         schedule_interval=datetime.timedelta(hours=1),
 ) as dag:
     # Download raw data for all devices
-    get_raw_data = GraphQLHttpOperator(
+    all_devices_history = GraphQLHttpOperator(
         http_conn_id='datacake',
         task_id='all_devices_history',
         # Jinja escape characters for GraphQL syntax
@@ -96,6 +98,33 @@ with airflow.DAG(
         query {{ '{' }}
           allDevices(inWorkspace: "{{ var.value.datacake_workspace_id }}") {{ '{' }}
             id
+            serialNumber
+            verboseName
+            location
+            lastHeard
+            tags
+            metadata
+            softwareVersion
+            claimed
+            claimCode
+            online
+            ttnDevId
+            internalId
+            isKemperDevice
+            product {{ '{' }}
+              id
+              name
+              slug
+            {{ '}' }}
+            currentMeasurements(allActiveFields:true) {{ '{' }}
+              field {{ '{' }}
+                id
+                fieldName
+                verboseFieldName
+                unit
+                description  
+              {{ '}' }}
+            {{ '}' }}
             history(
               fields: ["CO2","TEMPERATURE","AIR_QUALITY","HUMIDITY","LORAWAN_SNR","LORAWAN_DATARATE","LORAWAN_RSSI"]
               timerangestart: "{{ ts }}"
@@ -105,6 +134,9 @@ with airflow.DAG(
           {{ '}' }}
         {{ '}' }}
         """),
+        # Parse JSON response
+        response_filter=lambda response: json.loads(response.text)['data'][
+            'allDevices'],
     )
 
     bulk_load = PythonOperator(
@@ -113,4 +145,24 @@ with airflow.DAG(
         provide_context=True,
     )
 
-    get_raw_data >> bulk_load
+    # Insert or update values
+    merge_devices = PostgresOperator(
+        task_id='merge_devices',
+        postgres_conn_id='database',
+        sql=textwrap.dedent("""
+        INSERT INTO
+            airbods.public.device (device_id, serialnumber, verbosename, object)
+        VALUES
+            {% for device in task_instance.xcom_pull('all_devices_history') %}
+            {% if not loop.first %},{% endif %}
+            ("{{ device['id'] }}", "{{ device['serialNumber'] }}", "{{ device['verbosename'] }}", "{{ device|tojson }}")
+            {% endfor %}
+        ON CONFLICT (device_id)
+        DO UPDATE SET device.serialnumber = EXCLUDED.serialnumber,
+                      device.verbosename = EXCLUDED.verbosename,
+                      device.object = EXCLUDED.object;
+        """)
+    )
+
+    all_devices_history >> merge_devices
+    all_devices_history >> bulk_load
