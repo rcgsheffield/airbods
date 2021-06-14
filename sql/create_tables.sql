@@ -37,10 +37,14 @@ CREATE TABLE IF NOT EXISTS airbods.public.raw (
     air_quality       varchar(32) NULL,
     co2               numeric(5, 1) NULL,
     humidity          numeric(5, 1) NULL,
+    temperature       numeric(5, 1) NULL,
     lorawan_datarate  varchar(16) NULL,
     lorawan_rssi      numeric(5, 1) NULL,
     lorawan_snr       numeric(5, 1) NULL,
-    temperature       numeric(5, 1) NULL,
+    battery           varchar(32) NULL,
+    pm1               numeric(5, 1) NULL,
+    pm25              numeric(5, 1) NULL,
+    pm10              numeric(5, 1) NULL,
     -- Two-column unique restriction
     UNIQUE (device_id, time_)
 );
