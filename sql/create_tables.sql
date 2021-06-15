@@ -2,8 +2,8 @@
 DROP TABLE IF EXISTS airbods.public.device;
 CREATE TABLE IF NOT EXISTS airbods.public.device (
     device_id       uuid NOT NULL PRIMARY KEY,
-    serialnumber    varchar(32) NOT NULL UNIQUE,
-    verbosename     varchar(64) NOT NULL UNIQUE,
+    serial_number   varchar(32) NOT NULL UNIQUE,
+    verbose_name    varchar(64) NOT NULL UNIQUE,
     object          json NOT NULL
 );
 

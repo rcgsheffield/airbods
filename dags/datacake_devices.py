@@ -10,7 +10,7 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
 LOGGER = logging.getLogger(__name__)
 
 with airflow.DAG(
-        dag_id='datacake',
+        dag_id='datacake_devices',
         start_date=datetime.datetime(2021, 5, 17,
                                      tzinfo=datetime.timezone.utc),
         schedule_interval=datetime.timedelta(hours=1),
@@ -64,9 +64,9 @@ with airflow.DAG(
         postgres_conn_id='database',
         sql=textwrap.dedent("""
         INSERT INTO
-            airbods.public.device (device_id, serialnumber, verbosename, object)
+            airbods.public.device (device_id, serial_number, verbose_name, object)
         VALUES
-            {% for device in task_instance.xcom_pull('all_devices_history') %}
+            {% for device in task_instance.xcom_pull('all_devices') %}
             {% if not loop.first %},{% endif %}
             ('{{ device.id }}', '{{ device.serialNumber }}', 
             '{{ device.verboseName }}', '{{ device|tojson }}'::json)
