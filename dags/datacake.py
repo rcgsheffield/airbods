@@ -10,7 +10,6 @@ import psycopg2.extras
 from operators.graphql import GraphQLHttpOperator
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-from airflow.providers.postgres.operators.postgres import PostgresOperator
 
 LOGGER = logging.getLogger(__name__)
 
@@ -145,25 +144,4 @@ with airflow.DAG(
         provide_context=True,
     )
 
-    # Insert or update values
-    merge_devices = PostgresOperator(
-        task_id='merge_devices',
-        postgres_conn_id='database',
-        sql=textwrap.dedent("""
-        INSERT INTO
-            airbods.public.device (device_id, serialnumber, verbosename, object)
-        VALUES
-            {% for device in task_instance.xcom_pull('all_devices_history') %}
-            {% if not loop.first %},{% endif %}
-            ('{{ device.id }}', '{{ device.serialNumber }}', 
-            '{{ device.verboseName }}', '{{ device|tojson }}'::json)
-            {% endfor %}
-        ON CONFLICT (device_id)
-        DO UPDATE SET serialnumber = EXCLUDED.serialnumber,
-                      verbosename = EXCLUDED.verbosename,
-                      object = EXCLUDED.object;
-        """)
-    )
-
-    all_devices_history >> merge_devices
     all_devices_history >> bulk_load
