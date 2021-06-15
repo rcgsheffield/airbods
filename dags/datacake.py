@@ -130,10 +130,11 @@ with airflow.DAG(
         DELETE FROM airbods.public.clean
         WHERE time_ BETWEEN '{{ ts }}' AND '{{ next_execution_date.isoformat() }}';
         
-        -- Insert clean data rows
+        -- Insert clean data rows by transforming raw data
         INSERT INTO airbods.public.clean
         SELECT
              raw.device_id
+            -- Parse ISO timestamp inc. time zone
             ,raw.time_::timestamptz AS time_
             ,raw.air_quality
             ,raw.co2
