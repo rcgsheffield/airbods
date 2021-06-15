@@ -10,6 +10,7 @@ import psycopg2.extras
 from operators.graphql import GraphQLHttpOperator
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
+from airflow.providers.postgres.operators.postgres import PostgresOperator
 
 LOGGER = logging.getLogger(__name__)
 
@@ -97,33 +98,8 @@ with airflow.DAG(
         query {{ '{' }}
           allDevices(inWorkspace: "{{ var.value.datacake_workspace_id }}") {{ '{' }}
             id
-            serialNumber
             verboseName
-            location
-            lastHeard
-            tags
-            metadata
-            softwareVersion
-            claimed
-            claimCode
-            online
-            ttnDevId
-            internalId
-            isKemperDevice
-            product {{ '{' }}
-              id
-              name
-              slug
-            {{ '}' }}
-            currentMeasurements(allActiveFields:true) {{ '{' }}
-              field {{ '{' }}
-                id
-                fieldName
-                verboseFieldName
-                unit
-                description  
-              {{ '}' }}
-            {{ '}' }}
+            serialNumber
             history(
               fields: ["CO2","TEMPERATURE","AIR_QUALITY","HUMIDITY","LORAWAN_SNR","LORAWAN_DATARATE","LORAWAN_RSSI"]
               timerangestart: "{{ ts }}"
@@ -144,4 +120,28 @@ with airflow.DAG(
         provide_context=True,
     )
 
-    all_devices_history >> bulk_load
+    # Remove old data and insert transformed data (idempotent in a single
+    # transaction)
+    clean = PostgresOperator(
+        task_id='clean',
+        postgres_conn_id='database',
+        sql=textwrap.dedent("""
+        -- Remove old data for this time partition
+        DELETE FROM airbods.public.clean
+        WHERE time_ BETWEEN '{{ ts }}' AND '{{ next_execution_date.isoformat() }}';
+        
+        -- Insert clean data rows
+        INSERT INTO airbods.public.clean
+        SELECT
+             raw.device_id
+            ,raw.time_::timestamptz AS time_
+            ,raw.air_quality
+            ,raw.co2
+            ,raw.humidity
+            ,raw.temperature
+        FROM airbods.public.raw
+        WHERE raw.time_ BETWEEN '{{ ts }}' AND '{{ next_execution_date.isoformat() }}';
+        """),
+    )
+
+    all_devices_history >> bulk_load >> clean
