@@ -155,12 +155,13 @@ with airflow.DAG(
         VALUES
             {% for device in task_instance.xcom_pull('all_devices_history') %}
             {% if not loop.first %},{% endif %}
-            ("{{ device['id'] }}", "{{ device['serialNumber'] }}", "{{ device['verbosename'] }}", "{{ device|tojson }}")
+            ('{{ device.id }}', '{{ device.serialNumber }}', 
+            '{{ device.verboseName }}', '{{ device|tojson }}'::json)
             {% endfor %}
         ON CONFLICT (device_id)
-        DO UPDATE SET device.serialnumber = EXCLUDED.serialnumber,
-                      device.verbosename = EXCLUDED.verbosename,
-                      device.object = EXCLUDED.object;
+        DO UPDATE SET serialnumber = EXCLUDED.serialnumber,
+                      verbosename = EXCLUDED.verbosename,
+                      object = EXCLUDED.object;
         """)
     )
 
