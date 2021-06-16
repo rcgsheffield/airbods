@@ -1,5 +1,5 @@
 /* Sensor devices */
-DROP TABLE IF EXISTS airbods.public.device;
+DROP TABLE IF EXISTS airbods.public.device CASCADE;
 CREATE TABLE IF NOT EXISTS airbods.public.device
 (
     device_id     uuid        NOT NULL PRIMARY KEY,
@@ -9,26 +9,24 @@ CREATE TABLE IF NOT EXISTS airbods.public.device
 );
 
 /* Deployments (sensor position during time period) */
-DROP TABLE IF EXISTS airbods.public.deployment;
+DROP TABLE IF EXISTS airbods.public.deployment CASCADE ;
 CREATE TABLE IF NOT EXISTS airbods.public.deployment
 (
-    device_id     uuid                     NOT NULL PRIMARY KEY REFERENCES device (device_id),
-    start_time    timestamp with time zone NOT NULL,
-    end_time      timestamp with time zone NOT NULL,
-    sensor_number int                      NULL,
-    city          varchar(32)              NULL,
-    site          varchar(32)              NULL,
-    area          varchar(32)              NULL,
-    floor         varchar(32)              NULL,
-    room          varchar(32)              NULL,
-    zone          varchar(32)              NULL,
-    position      varchar(32)              NULL,
-    description   varchar(32)              NULL,
-    height        numeric(4, 2)            NULL,
-    comments      text                     NOT NULL DEFAULT '',
-    coordinates   point                    NULL,
-    extra         json                     NOT NULL DEFAULT '{}'::json,
-    UNIQUE (device_id, start_time, end_time)
+    serial_number varchar(32)               NOT NULL,
+    start_time    timestamp with time zone  NOT NULL,
+    end_time      timestamp with time zone  NOT NULL,
+    verbose_name  varchar(32)               NOT NULL,
+    city          varchar(32)               NOT NULL DEFAULT '',
+    site          varchar(32)               NOT NULL DEFAULT '',
+    area          varchar(32)               NOT NULL DEFAULT '',
+    floor         varchar(32)               NOT NULL DEFAULT '',
+    room          varchar(32)               NOT NULL DEFAULT '',
+    zone          varchar(32)               NOT NULL DEFAULT '',
+    description   varchar(32)               NOT NULL DEFAULT '',
+    height        numeric(4, 2)             NULL,
+    comments      text                      NOT NULL DEFAULT '',
+    person        varchar(64)               NOT NULL DEFAULT '',
+    UNIQUE (serial_number, start_time)
 );
 
 /* Raw data */
@@ -80,5 +78,5 @@ SELECT clean.device_id
 FROM airbods.public.clean
          INNER JOIN airbods.public.device ON clean.device_id = device.device_id
          LEFT JOIN airbods.public.deployment
-                   ON device.device_id = deployment.device_id
+                   ON device.serial_number = deployment.serial_number
                        AND clean.time_ BETWEEN deployment.start_time AND deployment.end_time;
