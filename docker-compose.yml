@@ -10,12 +10,14 @@ x-airflow-common: &airflow-common
       # Specify provider packages
       ADDITIONAL_PYTHON_DEPS: "apache-airflow-providers-postgres==1.0.* apache-airflow-providers-google==3.0.*"
   environment: &airflow-common-env
+    # Airflow configuration
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
     AIRFLOW__CORE__SQL_ALCHEMY_CONN_CMD: "cat /run/secrets/sql_alchemy_conn"
     AIRFLOW__CELERY__RESULT_BACKEND_CMD: "cat /run/secrets/result_backend"
     AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
     AIRFLOW__CORE__DEFAULT_TASK_RETRIES: 3
     AIRFLOW_VAR_DATACAKE_WORKSPACE_ID: "0bdfb2eb-6531-4afb-a842-ce6b51d3c980"
+    # Airbods data pipe parameters
     # Google sheet with sensor deployment info
     DEPLOYMENTS_SHEET_ID: "1qcWsE0EUED9W9SXPH0ojxTePrHvLQ5ZY0tfGszjXHs4"
     DEPLOYMENTS_TAB_NAME: "Deployments"

@@ -127,22 +127,40 @@ with airflow.DAG(
         task_id='clean',
         postgres_conn_id='database',
         sql=textwrap.dedent("""
+        -- Defer unique constraint until so we can DELETE and then INSERT 
+        -- before checking uniqueness after this atomic transaction completes.
+        SET CONSTRAINTS clean_device_id_time__key DEFERRED;
+        
         -- Remove old data for this time partition
         DELETE FROM airbods.public.clean
         WHERE time_ BETWEEN '{{ ts }}' AND '{{ next_execution_date.isoformat() }}';
         
         -- Insert clean data rows by transforming raw data
+        WITH transformed AS (
+            SELECT
+                 raw.device_id
+                -- Parse ISO timestamp inc. time zone
+                -- Round to two-minute resolution
+                -- TODO https://stackoverflow.com/a/62149151
+                ,DATE_TRUNC('minute', raw.time_::timestamptz) AS time_
+                ,raw.air_quality
+                ,raw.co2
+                ,raw.humidity
+                ,raw.temperature
+            FROM airbods.public.raw
+            WHERE raw.time_ BETWEEN '{{ ts }}' AND '{{ next_execution_date.isoformat() }}'
+        )
+        -- Group by device and time because we've rounded the time
         INSERT INTO airbods.public.clean
         SELECT
-             raw.device_id
-            -- Parse ISO timestamp inc. time zone
-            ,raw.time_::timestamptz AS time_
-            ,raw.air_quality
-            ,raw.co2
-            ,raw.humidity
-            ,raw.temperature
-        FROM airbods.public.raw
-        WHERE raw.time_ BETWEEN '{{ ts }}' AND '{{ next_execution_date.isoformat() }}';
+             transformed.device_id
+            ,transformed.time_
+            ,MAX(transformed.air_quality) AS air_quality
+            ,MAX(transformed.co2) AS co2
+            ,MAX(transformed.humidity) AS humidity
+            ,MAX(transformed.temperature) AS temperature
+        FROM transformed
+        GROUP BY transformed.device_id, transformed.time_;
         """),
     )
 

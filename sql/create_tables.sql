@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS airbods.public.raw
 );
 
 /* Clean data */
-DROP TABLE IF EXISTS airbods.public.clean;
+DROP TABLE IF EXISTS airbods.public.clean CASCADE;
 CREATE TABLE IF NOT EXISTS airbods.public.clean
 (
     device_id   uuid                     NOT NULL,
@@ -62,7 +62,10 @@ CREATE TABLE IF NOT EXISTS airbods.public.clean
     humidity    numeric(5, 1)            NULL,
     temperature numeric(5, 1)            NULL,
     -- Two-column unique restriction
-    UNIQUE (device_id, time_)
+    -- Allow this constraint to be deferred within a multi-statement transaction
+    -- so that chunks of data can be replaced easily
+    -- https://dba.stackexchange.com/a/105092
+    UNIQUE (device_id, time_) DEFERRABLE INITIALLY IMMEDIATE
 );
 
 /* Useful view */
