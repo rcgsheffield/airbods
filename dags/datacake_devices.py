@@ -16,7 +16,7 @@ with airflow.DAG(
         schedule_interval=datetime.timedelta(hours=1),
 ) as dag:
     # Download raw data for all devices
-    all_devices_history = GraphQLHttpOperator(
+    all_devices = GraphQLHttpOperator(
         task_id='all_devices',
         http_conn_id='datacake',
         # Jinja escape characters for GraphQL syntax
@@ -72,10 +72,10 @@ with airflow.DAG(
             '{{ device.verboseName }}', '{{ device|tojson }}'::json)
             {% endfor %}
         ON CONFLICT (device_id)
-        DO UPDATE SET serialnumber = EXCLUDED.serialnumber,
-                      verbosename = EXCLUDED.verbosename,
+        DO UPDATE SET serialnumber = EXCLUDED.serial_number,
+                      verbosename = EXCLUDED.verbose_name,
                       object = EXCLUDED.object;
         """)
     )
 
-    all_devices_history >> merge_devices
+    all_devices >> merge_devices
