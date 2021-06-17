@@ -111,7 +111,7 @@ def insert_deployments(*args, task_instance, **kwargs):
 
 with airflow.DAG(
         dag_id='deployments',
-        start_date=airflow.utils.dates.days_ago(0),
+        start_date=datetime.datetime(2021, 6, 16),
         schedule_interval=datetime.timedelta(days=1),
 ) as dag:
     get_deployments = PythonOperator(

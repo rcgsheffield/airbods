@@ -93,6 +93,7 @@ with airflow.DAG(
     all_devices_history = GraphQLHttpOperator(
         http_conn_id='datacake',
         task_id='all_devices_history',
+        retry_exponential_backoff=True,
         # Jinja escape characters for GraphQL syntax
         query=textwrap.dedent("""
         query {{ '{' }}

@@ -69,15 +69,27 @@ CREATE TABLE IF NOT EXISTS airbods.public.clean
 DROP VIEW IF EXISTS airbods.public.clean_device;
 CREATE OR REPLACE VIEW airbods.public.clean_device AS
 SELECT clean.device_id
-     , device.verbose_name  AS sensor_name
      , device.serial_number AS serial_number
-     , clean.time_
+     , device.verbose_name  AS sensor_name
+     , clean.time_ AS time_utc
+     , clean.time_ AT time zone 'Europe/London' AS time_europe_london
+     , deployment.city
+     , deployment.site
+     , deployment.floor
+     , deployment.room
+     , deployment.zone
+     , deployment.area
+     , deployment.height
+     , deployment.description
+     , deployment.comments
+     , deployment.person
+     -- Metrics
      , clean.air_quality
      , clean.co2
      , clean.humidity
      , clean.temperature
 FROM airbods.public.clean
-         INNER JOIN airbods.public.device ON clean.device_id = device.device_id
-         LEFT JOIN airbods.public.deployment
-                   ON device.serial_number = deployment.serial_number
-                       AND clean.time_ BETWEEN deployment.start_time AND deployment.end_time;
+    INNER JOIN airbods.public.device ON clean.device_id = device.device_id
+    LEFT JOIN airbods.public.deployment
+        ON device.serial_number = deployment.serial_number
+        AND clean.time_ BETWEEN deployment.start_time AND COALESCE(deployment.end_time, NOW());

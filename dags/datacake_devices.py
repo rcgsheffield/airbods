@@ -11,13 +11,14 @@ LOGGER = logging.getLogger(__name__)
 
 with airflow.DAG(
         dag_id='datacake_devices',
-        start_date=airflow.utils.dates.days_ago(0),
+        start_date=datetime.datetime(2021, 6, 16),
         schedule_interval=datetime.timedelta(days=1),
 ) as dag:
     # Download raw data for all devices
     all_devices = GraphQLHttpOperator(
         task_id='all_devices',
         http_conn_id='datacake',
+        retry_exponential_backoff=True,
         # Jinja escape characters for GraphQL syntax
         query=textwrap.dedent("""
         query {{ '{' }}
@@ -56,6 +57,7 @@ with airflow.DAG(
         # Parse JSON response
         response_filter=lambda response: json.loads(response.text)['data'][
             'allDevices'],
+        retries=3,
     )
     # Insert or update values
     merge_devices = PostgresOperator(
