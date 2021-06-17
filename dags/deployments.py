@@ -5,7 +5,7 @@ import os
 import logging
 from typing import Mapping
 
-import airflow
+import airflow.utils.dates
 from airflow.operators.python import PythonOperator
 from airflow.providers.google.suite.hooks.sheets import GSheetsHook
 from airflow.providers.postgres.hooks.postgres import PostgresHook
@@ -111,9 +111,8 @@ def insert_deployments(*args, task_instance, **kwargs):
 
 with airflow.DAG(
         dag_id='deployments',
-        start_date=datetime.datetime(2021, 5, 17,
-                                     tzinfo=datetime.timezone.utc),
-        schedule_interval=datetime.timedelta(hours=1),
+        start_date=airflow.utils.dates.days_ago(0),
+        schedule_interval=datetime.timedelta(days=1),
 ) as dag:
     get_deployments = PythonOperator(
         task_id='get_deployments',

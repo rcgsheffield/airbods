@@ -2,8 +2,8 @@ import datetime
 import textwrap
 import json
 import logging
-import airflow.models
 
+import airflow.utils.dates
 from operators.graphql import GraphQLHttpOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 
@@ -11,9 +11,8 @@ LOGGER = logging.getLogger(__name__)
 
 with airflow.DAG(
         dag_id='datacake_devices',
-        start_date=datetime.datetime(2021, 5, 17,
-                                     tzinfo=datetime.timezone.utc),
-        schedule_interval=datetime.timedelta(hours=1),
+        start_date=airflow.utils.dates.days_ago(0),
+        schedule_interval=datetime.timedelta(days=1),
 ) as dag:
     # Download raw data for all devices
     all_devices = GraphQLHttpOperator(

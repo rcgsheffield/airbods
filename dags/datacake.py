@@ -85,7 +85,7 @@ def bulk_load_values(*args, task_instance, **kwargs):
 
 with airflow.DAG(
         dag_id='datacake',
-        start_date=datetime.datetime(2021, 5, 17,
+        start_date=datetime.datetime(2021, 6, 7,
                                      tzinfo=datetime.timezone.utc),
         schedule_interval=datetime.timedelta(hours=1),
 ) as dag:
