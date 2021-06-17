@@ -53,15 +53,15 @@ def clean_rows(rows) -> Sequence[dict]:
 
 
 def insert_deployments(*args, task_instance, **kwargs):
+    # Get results of previous task
     rows = task_instance.xcom_pull('get_deployments')
     deployments = clean_rows(rows)
 
+    # Connect to target database
     hook = PostgresHook('database')
     connection = hook.get_conn()
-
-    # Bulk insert values
-    # https://hakibenita.com/fast-load-data-python-postgresql#execute-values-from-iterator-with-page-size
     with connection.cursor() as cursor:
+        # Replace all values in deployment table
         psycopg2.extras.execute_values(
             cur=cursor,
             sql="""
