@@ -140,7 +140,7 @@ with airflow.DAG(
             SELECT
                  raw.device_id
                 -- Parse ISO timestamp inc. time zone
-                -- Round to two-minute resolution
+                -- Round (floor) to two-minute resolution
                 -- TODO https://stackoverflow.com/a/62149151
                 ,DATE_TRUNC('minute', raw.time_::timestamptz) AS time_
                 ,raw.air_quality
@@ -149,18 +149,27 @@ with airflow.DAG(
                 ,raw.temperature
             FROM airbods.public.raw
             WHERE raw.time_ BETWEEN '{{ ts }}' AND '{{ next_execution_date.isoformat() }}'
-        )
+        ),
         -- Group by device and time because we've rounded the time
+        aggregated AS (
+            SELECT
+                 transformed.device_id
+                ,transformed.time_
+                ,MAX(transformed.air_quality) AS air_quality
+                ,MAX(transformed.co2) AS co2
+                ,MAX(transformed.humidity) AS humidity
+                ,MAX(transformed.temperature) AS temperature
+            FROM transformed
+            GROUP BY transformed.device_id, transformed.time_
+        )
+        -- Remove null rows
         INSERT INTO airbods.public.clean
-        SELECT
-             transformed.device_id
-            ,transformed.time_
-            ,MAX(transformed.air_quality) AS air_quality
-            ,MAX(transformed.co2) AS co2
-            ,MAX(transformed.humidity) AS humidity
-            ,MAX(transformed.temperature) AS temperature
-        FROM transformed
-        GROUP BY transformed.device_id, transformed.time_;
+        SELECT device_id, time_, air_quality, co2, humidity, temperature
+        FROM aggregated
+        WHERE air_quality IS NOT NULL
+            AND co2 IS NOT NULL
+            AND humidity IS NOT NULL
+            AND temperature IS NOT NULL;
         """),
     )
 
