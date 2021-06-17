@@ -72,8 +72,8 @@ with airflow.DAG(
             '{{ device.verboseName }}', '{{ device|tojson }}'::json)
             {% endfor %}
         ON CONFLICT (device_id)
-        DO UPDATE SET serialnumber = EXCLUDED.serial_number,
-                      verbosename = EXCLUDED.verbose_name,
+        DO UPDATE SET serial_number = EXCLUDED.serial_number,
+                      verbose_name = EXCLUDED.verbose_name,
                       object = EXCLUDED.object;
         """)
     )
