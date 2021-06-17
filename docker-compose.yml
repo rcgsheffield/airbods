@@ -16,7 +16,7 @@ x-airflow-common: &airflow-common
     AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
     AIRFLOW_VAR_DATACAKE_WORKSPACE_ID: "0bdfb2eb-6531-4afb-a842-ce6b51d3c980"
     # Google sheet with sensor deployment info
-    DEPLOYMENTS_SHEET_ID: "1PUDvogFqqibobidXBCr5Lg0girpqtllzKVmN1vE1Cww"
+    DEPLOYMENTS_SHEET_ID: "1qcWsE0EUED9W9SXPH0ojxTePrHvLQ5ZY0tfGszjXHs4"
     DEPLOYMENTS_TAB_NAME: "Deployments"
   env_file:
     ./secrets/.env

@@ -12,20 +12,21 @@ CREATE TABLE IF NOT EXISTS airbods.public.device
 DROP TABLE IF EXISTS airbods.public.deployment CASCADE ;
 CREATE TABLE IF NOT EXISTS airbods.public.deployment
 (
-    serial_number varchar(32)               NOT NULL,
+    serial_number varchar(64)               NOT NULL,
     start_time    timestamp with time zone  NOT NULL,
-    end_time      timestamp with time zone  NOT NULL,
-    verbose_name  varchar(32)               NOT NULL,
-    city          varchar(32)               NOT NULL DEFAULT '',
-    site          varchar(32)               NOT NULL DEFAULT '',
-    area          varchar(32)               NOT NULL DEFAULT '',
-    floor         varchar(32)               NOT NULL DEFAULT '',
-    room          varchar(32)               NOT NULL DEFAULT '',
-    zone          varchar(32)               NOT NULL DEFAULT '',
-    description   varchar(32)               NOT NULL DEFAULT '',
+    -- end_time = NULL means that the deployment remains active
+    end_time      timestamp with time zone  NULL,
+    verbose_name  varchar(64)               NULL,
+    city          varchar(64)               NULL,
+    site          varchar(64)               NULL,
+    area          varchar(64)               NULL,
+    floor         varchar(64)               NULL,
+    room          varchar(64)               NULL,
+    zone          varchar(64)               NULL,
+    description   varchar(256)              NULL,
     height        numeric(4, 2)             NULL,
-    comments      text                      NOT NULL DEFAULT '',
-    person        varchar(64)               NOT NULL DEFAULT '',
+    comments      text                      NULL,
+    person        varchar(128)              NULL,
     UNIQUE (serial_number, start_time)
 );
 

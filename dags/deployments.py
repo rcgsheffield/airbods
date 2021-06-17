@@ -3,12 +3,11 @@ from typing import Sequence
 import itertools
 import os
 import logging
-import textwrap
+from typing import Mapping
 
 import airflow
 from airflow.operators.python import PythonOperator
 from airflow.providers.google.suite.hooks.sheets import GSheetsHook
-from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 import psycopg2.extras
 
@@ -22,16 +21,27 @@ def clean_header(s: str) -> str:
     return s
 
 
-def get_deployments_values(file_id, range: str) -> Sequence[list]:
+def get_deployments_values(get_values_kwargs: Mapping, **kwargs) -> Sequence[
+    list]:
     """
     Retrieve rows from spreadsheet
     """
     hook = GSheetsHook()
 
-    rows = hook.get_values(spreadsheet_id=file_id, range_=range)
-    LOGGER.info("Retrieved %s rows from spreadsheet '%s'", len(rows), file_id)
+    return hook.get_values(**get_values_kwargs)
 
-    return rows
+
+def convert_date(s: str) -> str:
+    """
+    Convert British date format to ISO 8601 date
+    e.g. '16/04/2021' => '2021-04-16'
+    """
+    try:
+        return datetime.datetime.strptime(s, '%d/%m/%Y').date().isoformat()
+    # Ignore empty strings or nulls
+    except (ValueError, TypeError):
+        if s:
+            raise
 
 
 def clean_rows(rows) -> Sequence[dict]:
@@ -77,8 +87,8 @@ def insert_deployments(*args, task_instance, **kwargs):
             argslist=(
                 (
                     dep['serial_number'],
-                    dep['start_date'],
-                    dep['end_date'],
+                    convert_date(dep['start_date']),
+                    convert_date(dep.get('end_date', '')),
                     dep['name'],
                     dep.get('city'),
                     dep.get('site'),
@@ -109,8 +119,11 @@ with airflow.DAG(
         task_id='get_deployments',
         python_callable=get_deployments_values,
         op_kwargs=dict(
-            file_id=os.environ['DEPLOYMENTS_SHEET_ID'],
-            range=os.environ['DEPLOYMENTS_TAB_NAME']
+            # Arguments for GSheetsHook.get_values
+            get_values_kwargs=dict(
+                spreadsheet_id=os.environ['DEPLOYMENTS_SHEET_ID'],
+                range_=os.environ['DEPLOYMENTS_TAB_NAME'],
+            )
         )
     )
 
