@@ -16,9 +16,15 @@ x-airflow-common: &airflow-common
     AIRFLOW__CELERY__RESULT_BACKEND_CMD: "cat /run/secrets/result_backend"
     AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
     AIRFLOW__CORE__DEFAULT_TASK_RETRIES: 3
-    AIRFLOW_VAR_DATACAKE_WORKSPACE_ID: "0bdfb2eb-6531-4afb-a842-ce6b51d3c980"
+    # Web server SSL configuration
+    # https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html#ssl
+    AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT: "/run/secrets/ssl_cert"
+    AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY: "/run/secrets/ssl_key"
+    AIRFLOW__WEBSERVER__WEB_SERVER_PORT: 443
+    AIRFLOW__WEBSERVER__BASE_URL: "https://airbods.shef.ac.uk:443"
     # Airbods data pipe parameters
     # Google sheet with sensor deployment info
+    AIRFLOW_VAR_DATACAKE_WORKSPACE_ID: "0bdfb2eb-6531-4afb-a842-ce6b51d3c980"
     DEPLOYMENTS_SHEET_ID: "1qcWsE0EUED9W9SXPH0ojxTePrHvLQ5ZY0tfGszjXHs4"
     DEPLOYMENTS_TAB_NAME: "Deployments"
   env_file:
@@ -123,13 +129,6 @@ services:
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://localhost:5555/" ]
 
-  # Web server
-  proxy:
-    image: haproxy:2.4
-    volumes:
-      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
-    restart: always
-
 secrets:
   database:
     file: secrets/database.txt
@@ -141,3 +140,7 @@ secrets:
     file: secrets/sql_alchemy_conn.txt
   airflow:
     file: secrets/airflow.txt
+  ssl_cert:
+    file: secrets/ssl_cert.crt
+  ssl_key:
+    file: secrets/ssl_key.key
