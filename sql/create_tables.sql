@@ -3,8 +3,8 @@ DROP TABLE IF EXISTS airbods.public.device CASCADE;
 CREATE TABLE IF NOT EXISTS airbods.public.device
 (
     device_id     uuid        NOT NULL PRIMARY KEY,
-    serial_number varchar(32) NOT NULL UNIQUE,
-    verbose_name  varchar(64) NOT NULL UNIQUE,
+    serial_number varchar(128) NOT NULL UNIQUE,
+    verbose_name  varchar(128) NOT NULL UNIQUE,
     object        json        NOT NULL
 );
 
@@ -12,17 +12,17 @@ CREATE TABLE IF NOT EXISTS airbods.public.device
 DROP TABLE IF EXISTS airbods.public.deployment CASCADE ;
 CREATE TABLE IF NOT EXISTS airbods.public.deployment
 (
-    serial_number varchar(64)               NOT NULL,
+    serial_number varchar(128)               NOT NULL,
     start_time    timestamp with time zone  NOT NULL,
     -- end_time = NULL means that the deployment remains active
     end_time      timestamp with time zone  NULL,
-    verbose_name  varchar(64)               NULL,
-    city          varchar(64)               NULL,
-    site          varchar(64)               NULL,
-    area          varchar(64)               NULL,
-    floor         varchar(64)               NULL,
-    room          varchar(64)               NULL,
-    zone          varchar(64)               NULL,
+    verbose_name  varchar(128)               NULL,
+    city          varchar(128)               NULL,
+    site          varchar(128)               NULL,
+    area          varchar(128)               NULL,
+    floor         varchar(128)               NULL,
+    room          varchar(128)               NULL,
+    zone          varchar(128)               NULL,
     description   varchar(256)              NULL,
     height        numeric(4, 2)             NULL,
     comments      text                      NULL,
@@ -34,19 +34,19 @@ CREATE TABLE IF NOT EXISTS airbods.public.deployment
 DROP TABLE IF EXISTS airbods.public.raw;
 CREATE TABLE IF NOT EXISTS airbods.public.raw
 (
-    device_id        uuid          NOT NULL,
-    time_            varchar(32)   NOT NULL,
-    air_quality      varchar(32)   NULL,
-    co2              numeric(5, 1) NULL,
-    humidity         numeric(5, 1) NULL,
-    temperature      numeric(5, 1) NULL,
-    lorawan_datarate varchar(16)   NULL,
-    lorawan_rssi     numeric(5, 1) NULL,
-    lorawan_snr      numeric(5, 1) NULL,
-    battery          varchar(32)   NULL,
-    pm1              numeric(5, 1) NULL,
-    pm25             numeric(5, 1) NULL,
-    pm10             numeric(5, 1) NULL,
+    device_id        uuid               NOT NULL,
+    time_            varchar(128)        NOT NULL,
+    air_quality      varchar(128)        NULL,
+    co2              double precision   NULL,
+    humidity         double precision   NULL,
+    temperature      double precision   NULL,
+    lorawan_datarate varchar(16)        NULL,
+    lorawan_rssi     double precision   NULL,
+    lorawan_snr      double precision   NULL,
+    battery          varchar(128)        NULL,
+    pm1              double precision   NULL,
+    pm25             double precision   NULL,
+    pm10             double precision   NULL,
     -- Two-column unique restriction
     UNIQUE (device_id, time_)
 );
@@ -55,12 +55,12 @@ CREATE TABLE IF NOT EXISTS airbods.public.raw
 DROP TABLE IF EXISTS airbods.public.clean CASCADE;
 CREATE TABLE IF NOT EXISTS airbods.public.clean
 (
-    device_id   uuid                     NOT NULL,
-    time_       timestamp with time zone NOT NULL,
-    air_quality varchar(32)              NULL,
-    co2         numeric(5, 1)            NULL,
-    humidity    numeric(5, 1)            NULL,
-    temperature numeric(5, 1)            NULL,
+    device_id   uuid                        NOT NULL,
+    time_       timestamp with time zone    NOT NULL,
+    air_quality varchar(128)                 NULL,
+    co2         double precision            NULL,
+    humidity    double precision            NULL,
+    temperature double precision            NULL,
     -- Two-column unique restriction
     -- Allow this constraint to be deferred within a multi-statement transaction
     -- so that chunks of data can be replaced easily
@@ -69,7 +69,6 @@ CREATE TABLE IF NOT EXISTS airbods.public.clean
 );
 
 /* Useful view */
-DROP VIEW IF EXISTS airbods.public.clean_device;
 CREATE OR REPLACE VIEW airbods.public.clean_device AS
 SELECT clean.device_id
      , device.serial_number AS serial_number
@@ -91,6 +90,10 @@ SELECT clean.device_id
      , clean.co2
      , clean.humidity
      , clean.temperature
+    -- Room averages
+    , AVG(clean.co2) OVER (PARTITION BY deployment.room) AS co2_room
+    , AVG(clean.humidity) OVER (PARTITION BY deployment.room) AS humidity_room
+    , AVG(clean.temperature) OVER (PARTITION BY deployment.room) AS temperature_room
 FROM airbods.public.clean
     INNER JOIN airbods.public.device ON clean.device_id = device.device_id
     LEFT JOIN airbods.public.deployment

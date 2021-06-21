@@ -123,6 +123,13 @@ services:
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://localhost:5555/" ]
 
+  # Web server
+  proxy:
+    image: haproxy:2.4
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    restart: always
+
 secrets:
   database:
     file: secrets/database.txt

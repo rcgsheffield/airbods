@@ -1,0 +1,6 @@
+# Development environment
+version: "3.8"
+services:
+  proxy:
+    ports:
+      - 80:80
