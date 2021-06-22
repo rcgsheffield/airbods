@@ -1,0 +1,43 @@
+---
+# This playbook defines tasks to deploy the application stack
+
+- name: Install PostgreSQL database
+  hosts: all
+  remote_user: root
+  tasks:
+    - name: Install postgresql package
+      apt:
+        name: postgresql
+    - name: Create Airbods DB user
+      user:
+        name: airbods
+    - name: Ensure PostgreSQL service is running
+      service:
+        name: postgresql
+        state: started
+    - name: Check PostgreSQL connection status
+      shell: pg_isready
+
+- name: Install Redis database
+  hosts: all
+  remote_user: root
+  tasks:
+    - name: Install Redis package
+      apt:
+        name: redis
+    - name: Ensure Redis is running
+      service:
+        name: redis
+        state: started
+    - name: Ensure Redis is responding
+      shell: redis-cli ping
+
+- name: Install Apache Airflow
+  hosts: all
+  remote_user: root
+
+  tasks:
+    - name: Install Airflow package
+      pip:
+        name: apache-airflow==2.1.*
+        virtualenv: /opt/airflow

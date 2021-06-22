@@ -42,6 +42,20 @@ x-airflow-common: &airflow-common
       condition: service_healthy
 
 services:
+  # Automated deployment
+  # Ansible control node
+  ansible:
+    build:
+      context: .
+      dockerfile: ansible/Dockerfile
+    environment:
+      - ANISBLE_CONFIG:/etc/ansible/ansible.cfg
+    volumes:
+      - ./ansible:/etc/ansible
+    secrets:
+      - source: ssh_key
+        mode: 0400
+
   # Research data storage
   database:
     image: postgres:13.3
@@ -144,3 +158,5 @@ secrets:
     file: secrets/ssl_cert.crt
   ssl_key:
     file: secrets/ssl_key.key
+  ssh_key:
+    file: secrets/id_rsa

@@ -36,6 +36,48 @@ Run unit tests:
 docker-compose exec worker python -m unittest --failfast
 ```
 
+# Deployment
+
+The private key must be installed and configured on the target machine so that the control node may connect using SSH. For example:
+
+```bash
+sa_cs1jsth@airbodsdev:~$ sudo ls -l /root/.ssh
+total 12
+-rw-r--r-- 1 root root 109 Jun 22 16:35 authorized_keys
+-rw------- 1 root root 464 Jun 22 16:35 id_rsa
+-rw-r--r-- 1 root root 109 Jun 22 16:35 id_rsa.pub
+```
+
+
+
+Check Ansible is working:
+
+```bash
+# View Ansible package version
+docker compose run ansible --version
+
+# View inventory
+docker compose run ansible all --list-hosts
+
+# Ping nodes
+docker compose run ansible all -m ping
+
+# Run a custom command
+docker compose run ansible all -a "echo OK"
+
+# Check a playbook
+docker compose run --entrypoint ansible-playbook ansible --check /etc/ansible/playbooks/test.yaml
+```
+
+Install services:
+
+```bash
+# Run a playbook
+docker compose run --entrypoint ansible-playbook ansible /etc/ansible/playbooks/airbods.yaml
+```
+
+
+
 # ODBC
 
 To install the PostgreSQL ODBC driver for Windows:
