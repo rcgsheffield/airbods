@@ -1,0 +1,6 @@
+---
+service:
+  - worker
+  - scheduler
+  - webserver
+...

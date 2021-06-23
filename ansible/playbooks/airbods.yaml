@@ -15,8 +15,6 @@
       service:
         name: postgresql
         state: started
-    - name: Check PostgreSQL connection status
-      shell: pg_isready
 
 - name: Install Redis database
   hosts: all
@@ -29,15 +27,50 @@
       service:
         name: redis
         state: started
-    - name: Ensure Redis is responding
-      shell: redis-cli ping
 
+# https://airflow.apache.org/docs/apache-airflow/stable/installation.html
 - name: Install Apache Airflow
   hosts: all
   remote_user: root
-
   tasks:
-    - name: Install Airflow package
+    - name: Create airflow user
+      user:
+        name: airflow
+    - name: Create Airflow group
+      group:
+        name: airflow
+    - name: Install Airflow prerequisites
+      apt:
+        name:
+          - freetds-bin
+          - krb5-user
+          - ldap-utils
+          - libsasl2-2
+          - libsasl2-modules
+          - libssl1.1
+          - locales
+          - lsb-release
+          - sasl2-bin
+          - sqlite3
+          - unixodbc
+          - python3-pip
+    - name: Install virtualenv
       pip:
-        name: apache-airflow==2.1.*
+        name: virtualenv
+    - name: Install Airflow packages
+      pip:
+        name:
+          - apache-airflow==2.1.*
+          - apache-airflow-providers-postgres==1.0.*
+          - apache-airflow-providers-google==3.0.*
         virtualenv: /opt/airflow
+    - name: Install systemd services
+      template:
+        src: /etc/ansible/airflow.service.j2
+        dest: /etc/systemd/system/airflow-{{ service }}.service
+    - name: Enable systemd services
+      systemd:
+        name: "{{ service }}"
+        state: enabled
+    - name: Initialise Airflow database
+      shell: /opt/airflow/bin/airflow db init

@@ -1,0 +1,14 @@
+[Unit]
+Description=Apache Airflow {{ service }}
+After=network.target
+Wants=postgresql.service redis.service
+
+[Service]
+User=airflow
+Group=airflow
+Type=simple
+ExecStart=/opt/airflow/bin/airflow {{ service }}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

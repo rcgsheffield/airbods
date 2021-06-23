@@ -76,8 +76,6 @@ Install services:
 docker compose run --entrypoint ansible-playbook ansible /etc/ansible/playbooks/airbods.yaml
 ```
 
-
-
 # ODBC
 
 To install the PostgreSQL ODBC driver for Windows:
