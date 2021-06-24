@@ -42,13 +42,12 @@ The private key must be installed and configured on the target machine so that t
 
 ```bash
 sa_cs1jsth@airbodsdev:~$ sudo ls -l /root/.ssh
-total 12
 -rw-r--r-- 1 root root 109 Jun 22 16:35 authorized_keys
 -rw------- 1 root root 464 Jun 22 16:35 id_rsa
--rw-r--r-- 1 root root 109 Jun 22 16:35 id_rsa.pub
+sa_cs1jsth@airbodsdev:~$ ls -l /home/airflow/.ssh
+-rw-r--r-- 1 airflow airflow 109 Jun 24 12:54 authorized_keys
+-rw------- 1 airflow airflow 464 Jun 24 12:54 id_rsa
 ```
-
-
 
 Check Ansible is working:
 
@@ -74,6 +73,12 @@ Install services:
 ```bash
 # Run a playbook
 docker compose run --entrypoint ansible-playbook ansible /etc/ansible/playbooks/airbods.yaml
+```
+
+## View logs
+
+```bash
+sudo journalctl -u airflow-scheduler --since "$(date -I) 12:00"
 ```
 
 # ODBC

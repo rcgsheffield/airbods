@@ -1,0 +1,10 @@
+---
+- name: Upgrade packages
+  hosts: all
+  remote_user: root
+  tasks:
+    - name: Aptitude full upgrade
+      apt:
+        update_cache: yes
+        upgrade: full
+...

@@ -8,6 +8,7 @@ RUN apt update && apt upgrade -y && apt install -y openssh-client &&\
 
 # Non-root user
 RUN groupadd -r $username && useradd -rm -g $username $username
+WORKDIR /home/$username
 USER $username
 
 ENTRYPOINT ["ansible"]

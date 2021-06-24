@@ -11,10 +11,27 @@
     - name: Create Airbods DB user
       user:
         name: airbods
+    - name: Install psycopg2
+      pip:
+        name:
+          - psycopg2-binary
+    - name: Install PostgreSQL auth config
+      copy:
+        src: pg_hba.conf
+        dest: /etc/postgresql/12/main/pg_hba.conf
+    - name: Create postgres user
+      user:
+        name: postgres
+        password: "{{ lookup('file', '/run/secrets/postgres') | password_hash('sha512') }}"
     - name: Ensure PostgreSQL service is running
       service:
         name: postgresql
-        state: started
+        state: restarted
+    - name: PostgreSQL listen on all addresses
+      community.postgresql.postgresql_set:
+        name: listen_addresses
+        value: "*"
+        login_password: "{{ lookup('file', '/run/secrets/postgres') }}"
 
 - name: Install Redis database
   hosts: all
@@ -26,7 +43,7 @@
     - name: Ensure Redis is running
       service:
         name: redis
-        state: started
+        state: restarted
 
 # https://airflow.apache.org/docs/apache-airflow/stable/installation.html
 - name: Install Apache Airflow
@@ -36,6 +53,7 @@
     - name: Create airflow user
       user:
         name: airflow
+        password: "{{ lookup('file', '/run/secrets/airflow') | password_hash('sha512') }}"
     - name: Create Airflow group
       group:
         name: airflow
@@ -60,7 +78,7 @@
     - name: Install Airflow packages
       pip:
         name:
-          - apache-airflow==2.1.*
+          - apache-airflow[celery]==2.1.*
           - apache-airflow-providers-postgres==1.0.*
           - apache-airflow-providers-google==3.0.*
         virtualenv: /opt/airflow
@@ -69,13 +87,46 @@
         src: /etc/ansible/airflow.service.j2
         dest: "/etc/systemd/system/airflow-{{ item }}.service"
       loop: "{{ service }}"
+    - name: Install Airflow configuration
+      copy:
+        src: airflow.cfg
+        dest: /home/airflow/airflow/airflow.cfg
+        owner: airflow
+    - name: Secure secrets dir
+      file:
+        path: /home/airflow/secrets
+        state: directory
+        mode: '0500'
+    - name: Install connection string
+      copy:
+        src: /run/secrets/sql_alchemy_conn_localhost
+        dest: /home/airflow/secrets/sql_alchemy_conn_localhost.txt
+        owner: airflow
+        mode: '0400'
+    - name: Install Airflow connections
+      copy:
+        src: /run/secrets/connections
+        dest: /home/airflow/secrets/connections.json
+        owner: airflow
+        mode: '0400'
+    - name: Install Airflow variables
+      copy:
+        src: /run/secrets/variables
+        dest: /home/airflow/secrets/variables.json
+        owner: airflow
+        mode: '0400'
     - name: Start systemd services
       systemd:
         name: "airflow-{{ item }}"
-        state: started
+        state: restarted
         daemon_reload: true
       loop: "{{ service }}"
+    - name: Create airflow database user
+      community.postgresql.postgresql_user:
+        user: airflow
+        login_password: "{{ lookup('file', '/run/secrets/postgres') }}"
     - name: Initialise Airflow database
+      remote_user: airflow
       # "initdb is also idempotent, so this can be run as often as you
       # choose to, without needing to worry about the database changing."
       # https://stackoverflow.com/a/59560731
