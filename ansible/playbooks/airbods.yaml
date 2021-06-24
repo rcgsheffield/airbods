@@ -67,10 +67,12 @@
     - name: Install systemd services
       template:
         src: /etc/ansible/airflow.service.j2
-        dest: /etc/systemd/system/airflow-{{ service }}.service
+        dest: "/etc/systemd/system/airflow-{{ item }}.service"
+      loop: "{{ service }}"
     - name: Enable systemd services
       systemd:
-        name: "{{ service }}"
-        state: enabled
+        name: "airflow-{{ item }}"
+        state: started
+      loop: "{{ service }}"
     - name: Initialise Airflow database
       shell: /opt/airflow/bin/airflow db init

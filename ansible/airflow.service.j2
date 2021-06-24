@@ -1,5 +1,5 @@
 [Unit]
-Description=Apache Airflow {{ service }}
+Description=Apache Airflow {{ item }}
 After=network.target
 Wants=postgresql.service redis.service
 
@@ -7,7 +7,7 @@ Wants=postgresql.service redis.service
 User=airflow
 Group=airflow
 Type=simple
-ExecStart=/opt/airflow/bin/airflow {{ service }}
+ExecStart=/opt/airflow/bin/airflow{% if item == 'worker' %} celery{% endif %} {{ item }}
 Restart=always
 
 [Install]
