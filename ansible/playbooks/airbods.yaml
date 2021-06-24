@@ -69,10 +69,14 @@
         src: /etc/ansible/airflow.service.j2
         dest: "/etc/systemd/system/airflow-{{ item }}.service"
       loop: "{{ service }}"
-    - name: Enable systemd services
+    - name: Start systemd services
       systemd:
         name: "airflow-{{ item }}"
         state: started
+        daemon_reload: true
       loop: "{{ service }}"
     - name: Initialise Airflow database
+      # "initdb is also idempotent, so this can be run as often as you
+      # choose to, without needing to worry about the database changing."
+      # https://stackoverflow.com/a/59560731
       shell: /opt/airflow/bin/airflow db init
