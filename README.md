@@ -79,6 +79,12 @@ docker compose run --entrypoint ansible-playbook ansible /etc/ansible/playbooks/
 
 ```bash
 sudo journalctl -u airflow-scheduler --since "$(date -I) 12:00"
+
+# View PostgreSQL cluster status
+pg_lsclusters
+
+# View PostgreSQL logs
+sudo tail /var/log/postgresql/postgresql-12-main.log
 ```
 
 # ODBC

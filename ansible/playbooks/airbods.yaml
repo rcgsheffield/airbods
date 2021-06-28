@@ -121,9 +121,16 @@
         daemon_reload: true
       loop: "{{ service }}"
     - name: Create airflow database user
+      become: true
+      become_user: postgres
       community.postgresql.postgresql_user:
         user: airflow
-        login_password: "{{ lookup('file', '/run/secrets/postgres') }}"
+        password: "{{ lookup('file', '/run/secrets/airflow') }}"
+    - name: Create airflow database
+      become: true
+      become_user: postgres
+      community.postgresql.postgresql_db:
+        name: airflow
     - name: Initialise Airflow database
       remote_user: airflow
       # "initdb is also idempotent, so this can be run as often as you
