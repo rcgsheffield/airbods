@@ -23,15 +23,14 @@
       user:
         name: postgres
         password: "{{ lookup('file', '/run/secrets/postgres') | password_hash('sha512') }}"
+    - name: Install PostgreSQL configuration
+      copy:
+        src: postgresql.conf
+        dest: /etc/postgresql/12/main/postgresql.conf
     - name: Ensure PostgreSQL service is running
       service:
         name: postgresql
         state: restarted
-    - name: PostgreSQL listen on all addresses
-      community.postgresql.postgresql_set:
-        name: listen_addresses
-        value: "*"
-        login_password: "{{ lookup('file', '/run/secrets/postgres') }}"
 
 - name: Install Redis database
   hosts: all
