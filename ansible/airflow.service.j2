@@ -1,3 +1,9 @@
+# Airflow systemd examples:
+# https://github.com/apache/airflow/tree/main/scripts/systemd
+
+# How to Run Apache Airflow as Daemon Using Linux “systemd”
+# https://towardsdatascience.com/how-to-run-apache-airflow-as-daemon-using-linux-systemd-63a1d85f9702
+
 # Running Airflow with systemd
 # https://airflow.apache.org/docs/apache-airflow/stable/howto/run-with-systemd.html
 
@@ -7,7 +13,7 @@ After=network.target
 Wants=postgresql.service redis.service
 
 [Service]
-Environment="PATH=/usr/bin;/opt/airflow/bin"
+Environment="PATH=/usr/bin:/opt/airflow/bin"
 User=airflow
 Group=airflow
 Type=simple
