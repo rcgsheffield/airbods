@@ -144,4 +144,4 @@ airflow_bin_path: /opt/airflow/bin/airflow
       # https://stackoverflow.com/a/59560731
       shell: "{{ airflow_bin_path }} db init"
     - name: Create Airflow admin user
-      shell: "{{ airflow_bin_path }} users create --username airflow --role Admin"
+      shell: "{{ airflow_bin_path }} users create --username airflow --role Admin --email a@b.com --firstname Admin --lastname User"
