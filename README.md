@@ -4,6 +4,32 @@ Data pipelines and data storage for Airbods air measurement experiments.
 
 # Usage
 
+The system comprises several services.
+
+## View service status
+
+```bash
+systemctl status airflow-webserver
+systemctl status airflow-scheduler
+systemctl status airflow-worker
+```
+
+## View logs
+
+```bash
+# View systemd logs
+sudo journalctl -u airflow-webserver --since "$(date -I)"
+sudo journalctl -u airflow-scheduler --since "$(date -I) 12:00"
+
+# View PostgreSQL cluster status
+pg_lsclusters
+
+# View PostgreSQL logs
+sudo tail /var/log/postgresql/postgresql-12-main.log
+```
+
+## Container environment
+
 ```bash
 # Build images (and update remote images)
 docker-compose build --pull
@@ -75,18 +101,6 @@ Install services:
 docker compose run --entrypoint ansible-playbook ansible /etc/ansible/playbooks/airbods.yaml
 ```
 
-## View logs
-
-```bash
-sudo journalctl -u airflow-scheduler --since "$(date -I) 12:00"
-
-# View PostgreSQL cluster status
-pg_lsclusters
-
-# View PostgreSQL logs
-sudo tail /var/log/postgresql/postgresql-12-main.log
-```
-
 # ODBC
 
 To install the PostgreSQL ODBC driver for Windows:
@@ -119,3 +133,16 @@ To use Excel to connect to the database, you need an ODBC connection or DSN. You
 7. Select `clean_device` and click "Edit" to customise the query (to avoid downloading the entire database)
 8. Click "Refresh Preview" to see what the data look like
 9. Use the Power Query Editor to filter and transform data as required then click "Close & Load"
+
+# Database
+
+The PostgreSQL database can be administered using [psql](https://www.postgresql.org/docs/13/app-psql.html).
+
+```bash
+# Log in as database user
+su - postgres
+psql
+# List databases
+psql -c "\l"
+```
+

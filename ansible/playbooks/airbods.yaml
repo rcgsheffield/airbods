@@ -131,6 +131,7 @@
       become_user: postgres
       community.postgresql.postgresql_db:
         name: airflow
+        owner: airflow
     - name: Initialise Airflow database
       remote_user: airflow
       # "initdb is also idempotent, so this can be run as often as you

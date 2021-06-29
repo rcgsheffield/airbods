@@ -1,9 +1,13 @@
+# Running Airflow with systemd
+# https://airflow.apache.org/docs/apache-airflow/stable/howto/run-with-systemd.html
+
 [Unit]
 Description=Apache Airflow {{ item }}
 After=network.target
 Wants=postgresql.service redis.service
 
 [Service]
+Environment="PATH=/usr/bin;/opt/airflow/bin"
 User=airflow
 Group=airflow
 Type=simple
