@@ -94,26 +94,31 @@
         owner: airflow
     - name: Secure secrets dir
       file:
-        path: /home/airflow/secrets
+        path: "{{ secrets_dir }}"
         state: directory
         mode: '0500'
+        owner: airflow
+        group: airflow
     - name: Install connection string
       copy:
         src: /run/secrets/sql_alchemy_conn_localhost
-        dest: /home/airflow/secrets/sql_alchemy_conn_localhost.txt
+        dest: "{{ secrets_dir }}/sql_alchemy_conn_localhost.txt"
         owner: airflow
+        group: airflow
         mode: '0400'
     - name: Install Airflow connections
       copy:
         src: /run/secrets/connections
-        dest: /home/airflow/secrets/connections.json
+        dest: "{{ secrets_dir }}/connections.json"
         owner: airflow
+        group: airflow
         mode: '0400'
     - name: Install Airflow variables
       copy:
         src: /run/secrets/variables
-        dest: /home/airflow/secrets/variables.json
+        dest: "{{ secrets_dir }}/variables.json"
         owner: airflow
+        group: airflow
         mode: '0400'
     - name: Start systemd services
       systemd:
@@ -140,4 +145,22 @@
       # https://stackoverflow.com/a/59560731
       shell: "{{ airflow_bin_path }}/airflow db init"
     - name: Create Airflow admin user
-      shell: "{{ airflow_bin_path }}/airflow users create --username airflow --role Admin --email a@b.com --firstname Admin --lastname User"
+      # Don't show password
+      #no_log: true
+      command:
+        argv:
+          - "{{ airflow_bin_path }}/airflow"
+          - "users"
+          - "create"
+          - "--username"
+          - "airflow"
+          - "--password"
+          - "{{ lookup('file', '/run/secrets/airflow') }}"
+          - "--firstname"
+          - "admin"
+          - "--lastname"
+          - "user"
+          - "--role"
+          - "Admin"
+          - "--email"
+          - "airbods@sheffield.ac.uk"

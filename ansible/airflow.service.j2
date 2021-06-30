@@ -14,6 +14,7 @@ Wants=postgresql.service redis.service
 
 [Service]
 Environment="PATH=/usr/bin:{{ airflow_bin_path }}"
+Environment="AIRFLOW_HOME=/home/airflow/airflow"
 User=airflow
 Group=airflow
 Type=simple

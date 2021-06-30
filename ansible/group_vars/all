@@ -5,4 +5,5 @@ service:
   - webserver
 
 airflow_bin_path: /opt/airflow/bin
+secrets_dir: /home/airflow/secrets
 ...
