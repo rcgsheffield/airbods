@@ -13,11 +13,11 @@ After=network.target
 Wants=postgresql.service redis.service
 
 [Service]
-Environment="PATH=/usr/bin:/opt/airflow/bin"
+Environment="PATH=/usr/bin:{{ airflow_bin_path }}"
 User=airflow
 Group=airflow
 Type=simple
-ExecStart=/opt/airflow/bin/airflow{% if item == 'worker' %} celery{% endif %} {{ item }}
+ExecStart={{ airflow_bin_path }}/airflow{% if item == 'worker' %} celery{% endif %} {{ item }}
 Restart=always
 
 [Install]

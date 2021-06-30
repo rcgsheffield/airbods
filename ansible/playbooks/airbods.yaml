@@ -1,10 +1,6 @@
 ---
 # This playbook defines tasks to deploy the application stack
 
-# Variables
-airflow_bin_path: /opt/airflow/bin/airflow
-
-
 - name: Install PostgreSQL database
   hosts: all
   remote_user: root
@@ -142,6 +138,6 @@ airflow_bin_path: /opt/airflow/bin/airflow
       # "initdb is also idempotent, so this can be run as often as you
       # choose to, without needing to worry about the database changing."
       # https://stackoverflow.com/a/59560731
-      shell: "{{ airflow_bin_path }} db init"
+      shell: "{{ airflow_bin_path }}/airflow db init"
     - name: Create Airflow admin user
-      shell: "{{ airflow_bin_path }} users create --username airflow --role Admin --email a@b.com --firstname Admin --lastname User"
+      shell: "{{ airflow_bin_path }}/airflow users create --username airflow --role Admin --email a@b.com --firstname Admin --lastname User"

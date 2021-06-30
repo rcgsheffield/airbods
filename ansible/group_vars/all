@@ -3,4 +3,6 @@ service:
   - worker
   - scheduler
   - webserver
+
+airflow_bin_path: /opt/airflow/bin
 ...
