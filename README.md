@@ -66,6 +66,8 @@ docker-compose exec worker python -m unittest --failfast
 
 # Deployment
 
+Ansible [Executing playbooks for troubleshooting](https://docs.ansible.com/ansible/latest/user_guide/playbooks_startnstep.html)
+
 The private key must be installed and configured on the target machine so that the control node may connect using SSH. For example:
 
 ```bash
@@ -99,7 +101,6 @@ docker compose run --entrypoint ansible-playbook ansible --check /etc/ansible/pl
 Install services:
 
 ```bash
-# Run a playbook
 docker compose run --entrypoint ansible-playbook ansible /etc/ansible/playbooks/airbods.yaml
 ```
 

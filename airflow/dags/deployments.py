@@ -1,11 +1,11 @@
 import datetime
 from typing import Sequence
 import itertools
-import os
 import logging
 from typing import Mapping
 
 import airflow.utils.dates
+from airflow.models import Variable
 from airflow.operators.python import PythonOperator
 from airflow.providers.google.suite.hooks.sheets import GSheetsHook
 from airflow.providers.postgres.hooks.postgres import PostgresHook
@@ -120,8 +120,8 @@ with airflow.DAG(
         op_kwargs=dict(
             # Arguments for GSheetsHook.get_values
             get_values_kwargs=dict(
-                spreadsheet_id=os.environ['DEPLOYMENTS_SHEET_ID'],
-                range_=os.environ['DEPLOYMENTS_TAB_NAME'],
+                spreadsheet_id=Variable.get('deployments_sheet_id'),
+                range_=Variable.get('deployments_tab_name'),
             )
         )
     )
@@ -130,54 +130,5 @@ with airflow.DAG(
         task_id='update_deployments',
         python_callable=insert_deployments,
     )
-
-    # # Insert or update values
-    # update_deployments = PostgresOperator(
-    #     task_id='update_deployments',
-    #     postgres_conn_id='database',
-    #     sql=textwrap.dedent("""
-    #     INSERT INTO airbods.public.deployment (
-    #         serial_number
-    #         ,start_time
-    #         ,end_time
-    #         ,verbose_name
-    #         ,city
-    #         ,site
-    #         ,area
-    #         ,floor
-    #         ,room
-    #         ,zone
-    #         ,description
-    #         ,height
-    #         ,comments
-    #         ,person
-    #     VALUES
-    #         {% for dep in task_instance.xcom_pull('get_deployments') %}
-    #         {% if not loop.first %},{% endif %}
-    #         ('{{ dep.serial_number }}', '{{ dep.start_date }}'::timestamptz,
-    #         '{{ dep.end_date }}'::timestamptz, '{{ dep.name }}',
-    #         '{{ dep.city }}', '{{ dep.site }}', '{{ dep.area }}',
-    #         '{{ dep.floor }}', '{{ dep.room }}', '{{ dep.zone }}',
-    #         '{{ dep.description }}', {{ dep.heightm|float }},
-    #         '{{ dep.comments }}', '{{ dep.person }}')
-    #         {% endfor %}
-    #     ON CONFLICT (serial_number, start_time)
-    #     DO UPDATE SET
-    #          serial_number = EXCLUDED.serial_number
-    #         ,start_time    = EXCLUDED.start_time
-    #         ,end_time      = EXCLUDED.end_time
-    #         ,verbose_name  = EXCLUDED.verbose_name
-    #         ,city          = EXCLUDED.city
-    #         ,site          = EXCLUDED.site
-    #         ,area          = EXCLUDED.area
-    #         ,floor         = EXCLUDED.floor
-    #         ,room          = EXCLUDED.room
-    #         ,zone          = EXCLUDED.zone
-    #         ,description   = EXCLUDED.description
-    #         ,height        = EXCLUDED.height
-    #         ,comments      = EXCLUDED.comments
-    #         ,person        = EXCLUDED.person
-    #     """)
-    # )
 
     get_deployments >> update_deployments

@@ -6,4 +6,5 @@ service:
 
 airflow_bin_path: /opt/airflow/bin
 secrets_dir: /home/airflow/secrets
+airflow_home: /home/airflow/airflow
 ...

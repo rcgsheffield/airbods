@@ -81,6 +81,7 @@
           - apache-airflow[celery]==2.1.*
           - apache-airflow-providers-postgres==1.0.*
           - apache-airflow-providers-google==3.0.*
+          - apache-airflow-providers-http==2.0.*
         virtualenv: /opt/airflow
     - name: Install systemd services
       template:
@@ -120,12 +121,6 @@
         owner: airflow
         group: airflow
         mode: '0400'
-    - name: Start systemd services
-      systemd:
-        name: "airflow-{{ item }}"
-        state: restarted
-        daemon_reload: true
-      loop: "{{ service }}"
     - name: Create airflow database user
       become: true
       become_user: postgres
@@ -164,3 +159,20 @@
           - "Admin"
           - "--email"
           - "airbods@sheffield.ac.uk"
+    - name: Install Airflow content
+      remote_user: airflow
+      copy:
+        src: "{{ item }}"
+        dest: "{{ airflow_home }}"
+      loop:
+        - /home/ansible/airflow/dags
+        - /home/ansible/airflow/plugins
+        - /home/ansible/airflow/tests
+        - /home/ansible/airflow/variables.env
+    - name: Start systemd services
+      systemd:
+        name: "airflow-{{ item }}"
+        state: restarted
+        daemon_reload: true
+      loop: "{{ service }}"
+...
