@@ -8,7 +8,7 @@
     - name: Install postgresql package
       apt:
         name: postgresql
-    - name: Create Airbods database user
+    - name: Create Airbods system user
       user:
         name: airbods
         system: yes
@@ -38,6 +38,11 @@
       community.postgresql.postgresql_user:
         user: airbods
         password: "{{ lookup('file', '/run/secrets/database') }}"
+    - name: Create Airbods database
+      become_user: postgres
+      community.postgresql.postgresql_db:
+        name: airbods
+        owner: airbods
 
 - name: Install Redis database
   hosts: all
@@ -181,10 +186,12 @@
         - /home/ansible/airflow/dags
         - /home/ansible/airflow/plugins
         - /home/ansible/airflow/tests
-    - name: Install Airflow environment variables
-      copy:
-        src: /home/ansible/airflow/.env
-        dest: /home/airflow
+        - /home/ansible/airflow/variables.json
+    - name: Import variables
+      remote_user: airflow
+      shell: "{{ airflow_bin_path }}/airflow variables import {{ airflow_home }}/variables.json"
+      tags:
+        - dev
     - name: Restart Airflow systemd services
       systemd:
         name: "airflow-{{ item }}"

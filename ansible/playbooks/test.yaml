@@ -3,10 +3,8 @@
   hosts: all
   remote_user: airflow
   tasks:
-     - name: Load DAG files
-       command: "{{ airflow_bin_path}}/python {{ airflow_home }}/dags/{{ item }}"
-       loop:
-         - datacake.py
-         - datacake_devices.py
-         - deployments.py
+    - name: Test DAGs
+      shell: "{{ airflow_bin_path }}/airflow dags test {{ item }} {{ ansible_date_time.date }}"
+      loop:
+        - datacake_devices
 ...

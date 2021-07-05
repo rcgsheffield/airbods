@@ -34,6 +34,9 @@ sudo tail /var/log/postgresql/postgresql-12-main.log
 Airflow [Using the Command Line Interface](http://airflow.apache.org/docs/apache-airflow/stable/usage-cli.html#)
 
 ```bash
+# Log in as system user
+sudo su - airflow
+
 /opt/airflow/bin/airflow --help
 
 # List users

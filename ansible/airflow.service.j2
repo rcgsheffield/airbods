@@ -15,11 +15,10 @@ Wants=postgresql.service redis.service
 [Service]
 Environment="PATH=/usr/bin:{{ airflow_bin_path }}"
 Environment="AIRFLOW_HOME={{ airflow_home }}"
-EnvironmentFile=/home/airflow/.env
 User=airflow
 Group=airflow
 Type=simple
-ExecStart={{ airflow_bin_path }}/airflow{% if item == 'worker' %} celery{% endif %} {{ item }}
+ExecStart={{ airflow_bin_path }}/airflow{% if item in ['worker', 'flower'] %} celery{% endif %} {{ item }}
 Restart=always
 
 [Install]

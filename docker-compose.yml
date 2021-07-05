@@ -24,7 +24,6 @@ x-airflow-common: &airflow-common
     AIRFLOW__WEBSERVER__BASE_URL: "https://airbods.shef.ac.uk:443"
   env_file:
     - ./secrets/.env
-    - ./airflow/.env
   volumes:
     - ./airflow:/opt/airflow
     - ./logs:/opt/airflow/logs
