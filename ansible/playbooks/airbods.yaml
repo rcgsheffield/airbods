@@ -133,6 +133,12 @@
       community.postgresql.postgresql_db:
         name: airflow
         owner: airflow
+    - name: Start Airflow systemd services
+      systemd:
+        name: "airflow-{{ item }}"
+        state: started
+        daemon_reload: true
+      loop: "{{ service }}"
     - name: Initialise Airflow database
       remote_user: airflow
       # "initdb is also idempotent, so this can be run as often as you
@@ -169,7 +175,7 @@
         - /home/ansible/airflow/plugins
         - /home/ansible/airflow/tests
         - /home/ansible/airflow/variables.env
-    - name: Start systemd services
+    - name: Restart Airflow systemd services
       systemd:
         name: "airflow-{{ item }}"
         state: restarted
