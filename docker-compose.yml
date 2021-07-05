@@ -24,7 +24,7 @@ x-airflow-common: &airflow-common
     AIRFLOW__WEBSERVER__BASE_URL: "https://airbods.shef.ac.uk:443"
   env_file:
     - ./secrets/.env
-    - ./airflow/variables.env
+    - ./airflow/.env
   volumes:
     - ./airflow:/opt/airflow
     - ./logs:/opt/airflow/logs
@@ -55,6 +55,7 @@ services:
       - airflow
       - postgres
       - sql_alchemy_conn_localhost
+      - database
 
   # Research data storage
   database:

@@ -8,9 +8,10 @@
     - name: Install postgresql package
       apt:
         name: postgresql
-    - name: Create Airbods DB user
+    - name: Create Airbods database user
       user:
         name: airbods
+        system: yes
     - name: Install psycopg2
       pip:
         name:
@@ -31,6 +32,12 @@
       service:
         name: postgresql
         state: restarted
+    - name: Create Airbods database user
+      become: true
+      become_user: postgres
+      community.postgresql.postgresql_user:
+        user: airbods
+        password: "{{ lookup('file', '/run/secrets/database') }}"
 
 - name: Install Redis database
   hosts: all
@@ -174,7 +181,10 @@
         - /home/ansible/airflow/dags
         - /home/ansible/airflow/plugins
         - /home/ansible/airflow/tests
-        - /home/ansible/airflow/variables.env
+    - name: Install Airflow environment variables
+      copy:
+        src: /home/ansible/airflow/.env
+        dest: /home/airflow
     - name: Restart Airflow systemd services
       systemd:
         name: "airflow-{{ item }}"

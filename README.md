@@ -18,6 +18,7 @@ systemctl status airflow-worker
 
 ```bash
 # View systemd logs
+sudo journalctl -u airflow-worker --since "$(date -I)"
 sudo journalctl -u airflow-webserver --since "$(date -I)"
 sudo journalctl -u airflow-scheduler --since "$(date -I) 12:00"
 
@@ -27,6 +28,22 @@ pg_lsclusters
 # View PostgreSQL logs
 sudo tail /var/log/postgresql/postgresql-12-main.log
 ```
+
+## Airflow CLI
+
+Airflow [Using the Command Line Interface](http://airflow.apache.org/docs/apache-airflow/stable/usage-cli.html#)
+
+```bash
+/opt/airflow/bin/airflow --help
+
+# List users
+/opt/airflow/bin/airflow users list
+
+# List DAGs
+/opt/airflow/bin/airflow dags list
+```
+
+
 
 ## Container environment
 
@@ -102,6 +119,12 @@ Install services:
 
 ```bash
 docker compose run --entrypoint ansible-playbook ansible /etc/ansible/playbooks/airbods.yaml
+```
+
+Run automated tests:
+
+```bash
+docker compose run --entrypoint ansible-playbook ansible /etc/ansible/playbooks/test.yaml
 ```
 
 # ODBC
