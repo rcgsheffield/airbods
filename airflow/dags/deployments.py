@@ -52,7 +52,8 @@ def clean_rows(rows) -> Sequence[dict]:
     return [dict(itertools.zip_longest(headers, row)) for row in rows]
 
 
-def insert_deployments(*args, task_instance, **kwargs):
+def insert_deployments(*args, task_instance, test_mode: bool = False,
+                       **kwargs):
     # Get results of previous task
     rows = task_instance.xcom_pull('get_deployments')
     deployments = clean_rows(rows)
@@ -106,7 +107,8 @@ def insert_deployments(*args, task_instance, **kwargs):
             page_size=1000,
         )
 
-    connection.commit()
+    if not test_mode:
+        connection.commit()
 
 
 with airflow.DAG(

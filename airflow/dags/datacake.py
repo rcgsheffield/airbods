@@ -28,7 +28,7 @@ def flatten_history(devices: Iterable[dict]) -> Iterable[dict]:
     LOGGER.info('Generated %s rows', row_count)
 
 
-def bulk_load_values(*args, task_instance, **kwargs):
+def bulk_load_values(*args, task_instance, test_mode: bool = False, **kwargs):
     # Get result of previous task
     devices = task_instance.xcom_pull('all_devices_history')
 
@@ -80,7 +80,8 @@ def bulk_load_values(*args, task_instance, **kwargs):
             page_size=1000,
         )
 
-    connection.commit()
+    if not test_mode:
+        connection.commit()
 
 
 with airflow.DAG(
