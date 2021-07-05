@@ -11,8 +11,9 @@ LOGGER = logging.getLogger(__name__)
 
 with airflow.DAG(
         dag_id='datacake_devices',
-        start_date=datetime.datetime(2021, 6, 16),
-        schedule_interval=datetime.timedelta(days=1),
+        # We can't retrieve historical data, so no need to back-fill
+        start_date=airflow.utils.dates.days_ago(1),
+        schedule_interval=datetime.timedelta(hours=6),
 ) as dag:
     # Download raw data for all devices
     all_devices = GraphQLHttpOperator(
