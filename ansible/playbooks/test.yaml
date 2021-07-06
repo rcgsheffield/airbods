@@ -7,4 +7,6 @@
       shell: "{{ airflow_bin_path }}/airflow dags test {{ item }} {{ ansible_date_time.date }}"
       loop:
         - datacake_devices
+        - datacake
+        - deployments
 ...

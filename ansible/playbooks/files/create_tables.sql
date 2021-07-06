@@ -1,5 +1,5 @@
 /* Sensor devices */
-DROP TABLE IF EXISTS airbods.public.device CASCADE;
+-- DROP TABLE IF EXISTS airbods.public.device CASCADE;
 CREATE TABLE IF NOT EXISTS airbods.public.device
 (
     device_id     uuid        NOT NULL PRIMARY KEY,
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS airbods.public.device
 );
 
 /* Deployments (sensor position during time period) */
-DROP TABLE IF EXISTS airbods.public.deployment CASCADE ;
+-- DROP TABLE IF EXISTS airbods.public.deployment CASCADE ;
 CREATE TABLE IF NOT EXISTS airbods.public.deployment
 (
     serial_number varchar(128)               NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS airbods.public.deployment
 );
 
 /* Raw data */
-DROP TABLE IF EXISTS airbods.public.raw;
+-- DROP TABLE IF EXISTS airbods.public.raw;
 CREATE TABLE IF NOT EXISTS airbods.public.raw
 (
     device_id        uuid               NOT NULL,
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS airbods.public.raw
 );
 
 /* Clean data */
-DROP TABLE IF EXISTS airbods.public.clean CASCADE;
+-- DROP TABLE IF EXISTS airbods.public.clean CASCADE;
 CREATE TABLE IF NOT EXISTS airbods.public.clean
 (
     device_id   uuid                        NOT NULL,

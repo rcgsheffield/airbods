@@ -32,12 +32,11 @@ def build_url(scheme, keyfile, scopes) -> str:
         google_cloud_platform__keyfile_dict=keyfile,
         google_cloud_platform__scope=scopes,
     )
-
+    query_params = {'extra__' + key: value
+                    for key, value in query_params.items()}
     print(json.dumps(query_params))
-
-    # Prefix
-    extra = {'extra__' + key: value for key, value in query_params.items()}
-    query = urllib.parse.urlencode(extra)
+    print()
+    query = urllib.parse.urlencode(query_params)
     parts = (scheme, '', '', query, '')
     return urllib.parse.urlunsplit(parts)
 

@@ -44,6 +44,14 @@
       community.postgresql.postgresql_db:
         name: airbods
         owner: airbods
+    - name: Create Airbods database structure
+      become: true
+      become_user: airbods
+      postgresql_query:
+        db: airbods
+        query: "{{ lookup('file', '/etc/ansible/playbooks/files/create_tables.sql') }}"
+        login_user: airbods
+        login_password: "{{ lookup('file', '/run/secrets/database') }}"
 
 - name: Install Redis database
   hosts: all
