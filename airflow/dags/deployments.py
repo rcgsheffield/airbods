@@ -116,14 +116,15 @@ with airflow.DAG(
         start_date=datetime.datetime(2021, 6, 16),
         schedule_interval=datetime.timedelta(days=1),
 ) as dag:
+    deployments = Variable.get('deployments', deserialize_json=True)
     get_deployments = PythonOperator(
         task_id='get_deployments',
         python_callable=get_deployments_values,
         op_kwargs=dict(
             # Arguments for GSheetsHook.get_values
             get_values_kwargs=dict(
-                spreadsheet_id=Variable.get('deployments_sheet_id'),
-                range_=Variable.get('deployments_tab_name'),
+                spreadsheet_id=deployments['sheet_id'],
+                range_=deployments['tab'],
             )
         )
     )

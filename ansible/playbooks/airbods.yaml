@@ -39,6 +39,7 @@
         user: airbods
         password: "{{ lookup('file', '/run/secrets/database') }}"
     - name: Create Airbods database
+      become: true
       become_user: postgres
       community.postgresql.postgresql_db:
         name: airbods
@@ -130,8 +131,8 @@
       copy:
         src: /run/secrets/variables
         dest: "{{ secrets_dir }}/variables.json"
-        owner: airflow
         group: airflow
+        owner: airflow
         mode: '0400'
     - name: Create airflow database user
       become: true
