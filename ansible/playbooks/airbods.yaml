@@ -99,7 +99,7 @@
     - name: Install Airflow packages
       pip:
         name:
-          - apache-airflow[celery]==2.1.*
+          - apache-airflow[celery,redis]==2.1.*
           - apache-airflow-providers-postgres==1.0.*
           - apache-airflow-providers-google==3.0.*
           - apache-airflow-providers-http==2.0.*
@@ -201,10 +201,4 @@
       shell: "{{ airflow_bin_path }}/airflow variables import {{ airflow_home }}/variables.json"
       tags:
         - dev
-    - name: Restart Airflow systemd services
-      systemd:
-        name: "airflow-{{ item }}"
-        state: restarted
-        daemon_reload: true
-      loop: "{{ service }}"
 ...

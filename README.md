@@ -46,7 +46,12 @@ sudo su - airflow
 /opt/airflow/bin/airflow dags list
 ```
 
+## Worker monitoring
 
+You can look at the workers using [Flower](https://flower.readthedocs.io/en/latest/), a celery monitoring tool.
+
+1. SSH tunnel to port 5555 to 127.0.0.1:5555
+2. Open `http://localhost:5555/`
 
 ## Container environment
 
