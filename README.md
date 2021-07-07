@@ -53,6 +53,14 @@ You can look at the workers using [Flower](https://flower.readthedocs.io/en/late
 1. SSH tunnel to port 5555 to 127.0.0.1:5555
 2. Open `http://localhost:5555/`
 
+## Message broker management console
+
+SSH tunnel 15672 to 127.0.0.1:15672
+
+```
+http://localhost:15672/
+```
+
 ## Container environment
 
 This is for development purposes only.

@@ -65,6 +65,28 @@
         name: redis
         state: restarted
 
+# Why You Should use Celery with RabbitMQ
+# https://www.section.io/engineering-education/why-you-should-use-celery-with-rabbitmq/
+- name: Install RabbitMQ message broker
+  hosts: all
+  remote_user: root
+  tasks:
+    - name: Install RabbitMQ package
+      apt:
+        name: rabbitmq-server
+    - name: Start RabbitMQ service
+      systemd:
+        name: rabbitmq-server
+        state: started
+    - name: Enable RabbitMQ management console
+      shell: rabbitmq-plugins enable rabbitmq_management
+    - name: Create vhost
+      shell: rabbitmqctl add_vhost airbods
+    - name: Create user
+      shell: rabbitmqctl add_user airbods fWfkEq4C
+    - name: Delete guest user
+      shell: rabbitmqctl delete_user guest
+
 # https://airflow.apache.org/docs/apache-airflow/stable/installation.html
 - name: Install Apache Airflow
   hosts: all
