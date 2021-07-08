@@ -141,7 +141,7 @@ WITH device_deployment_ AS (
          , ROW_NUMBER() OVER (PARTITION BY device.device_id
         ORDER BY airbods.public.deployment.start_time DESC) AS latest_
     FROM airbods.public.device
-             LEFT JOIN airbods.public.deployment ON device.serial_number = deployment.serial_numberó
+             LEFT JOIN airbods.public.deployment ON device.serial_number = deployment.serial_number
 )
 -- Select latest deployment only
 SELECT *
