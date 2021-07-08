@@ -202,6 +202,6 @@ Using the Airflow CLI, use the [backfill command](https://airflow.apache.org/doc
 
 ```bash
 # /opt/airflow/bin/airflow dags backfill $DAG_ID -s $START_DATE
-/opt/airflow/bin/airflow dags backfill datacake -s 2021-06-07 --verbose
+/opt/airflow/bin/airflow dags backfill datacake -s 2021-04-15 --verbose
 ```
 
