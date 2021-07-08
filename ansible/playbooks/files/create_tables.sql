@@ -78,10 +78,10 @@ SELECT clean.device_id
      , clean.time_ AT time zone 'Europe/London'                   AS time_europe_london
      , deployment.city
      , deployment.site
-     , deployment.floor
-     , deployment.room
-     , deployment.zone
      , deployment.area
+     , deployment.room
+     , deployment.floor
+     , deployment.zone
      , deployment.height
      , deployment.description
      , deployment.comments
