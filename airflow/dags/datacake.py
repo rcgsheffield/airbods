@@ -30,8 +30,8 @@ def flatten_history(devices: Iterable[dict]) -> Iterable[dict]:
     LOGGER.info('Generated %s rows', row_count)
 
 
-def bulk_load_values(*args, task_instance: TaskInstance,
-                     test_mode: bool = False, **kwargs):
+def bulk_load_values(*args, task_instance: TaskInstance, execution_date,
+                     next_execution_date, test_mode: bool = False, **kwargs):
     # Get result of previous task
     raw_data = task_instance.xcom_pull('all_devices_history')
     # Parse JSON data
@@ -46,16 +46,14 @@ def bulk_load_values(*args, task_instance: TaskInstance,
 
     table_name = 'airbods.public.raw'
 
-    context = task_instance.get_template_context()
-
     # Insert/update values in one transaction
     with connection.cursor() as cursor:
 
         # Delete old values
         sql = textwrap.dedent(f"""
         DELETE FROM {table_name}
-        WHERE time_ BETWEEN '{task_instance.execution_date}'
-            AND '{context['next_execution_date']}'
+        WHERE time_ BETWEEN '{execution_date}'
+            AND '{next_execution_date}'
         """)
         LOGGER.info(sql)
         cursor.execute(sql)
