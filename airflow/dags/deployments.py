@@ -1,4 +1,5 @@
 import datetime
+import textwrap
 from typing import Sequence
 import itertools
 import logging
@@ -63,29 +64,31 @@ def insert_deployments(*args, task_instance, test_mode: bool = False,
     connection = hook.get_conn()
     with connection.cursor() as cursor:
         # Replace all values in deployment table
+        sql = textwrap.dedent("""
+        DELETE FROM airbods.public.deployment;
+        INSERT INTO airbods.public.deployment (
+             serial_number
+            ,start_time   
+            ,end_time     
+            ,verbose_name         
+            ,city         
+            ,site         
+            ,area         
+            ,floor        
+            ,room         
+            ,zone         
+            ,description  
+            ,height       
+            ,comments     
+            ,person       
+            ,co2_baseline   
+        )
+        VALUES %s;
+        """)
+        LOGGER.info(sql)
         psycopg2.extras.execute_values(
             cur=cursor,
-            sql="""
-            DELETE FROM airbods.public.deployment;
-            INSERT INTO airbods.public.deployment (
-                 serial_number
-                ,start_time   
-                ,end_time     
-                ,verbose_name         
-                ,city         
-                ,site         
-                ,area         
-                ,floor        
-                ,room         
-                ,zone         
-                ,description  
-                ,height       
-                ,comments     
-                ,person       
-                ,co2_baseline   
-            )
-            VALUES %s;
-            """,
+            sql=sql,
             argslist=(
                 (
                     dep['serial_number'],
@@ -109,24 +112,27 @@ def insert_deployments(*args, task_instance, test_mode: bool = False,
             page_size=1000,
         )
 
-    if not test_mode:
+    if test_mode:
+        connection.rollback()
+    else:
         connection.commit()
 
 
 with airflow.DAG(
         dag_id='deployments',
-        start_date=datetime.datetime(2021, 6, 16),
+        # Project 16th April 2021 to November 2022
+        start_date=datetime.datetime(2021, 4, 15),
         schedule_interval=datetime.timedelta(days=1),
 ) as dag:
-    deployments = Variable.get('deployments', deserialize_json=True)
+    deployments_info = Variable.get('deployments', deserialize_json=True)
     get_deployments = PythonOperator(
         task_id='get_deployments',
         python_callable=get_deployments_values,
         op_kwargs=dict(
             # Arguments for GSheetsHook.get_values
             get_values_kwargs=dict(
-                spreadsheet_id=deployments['sheet_id'],
-                range_=deployments['tab'],
+                spreadsheet_id=deployments_info['sheet_id'],
+                range_=deployments_info['tab'],
             )
         )
     )
