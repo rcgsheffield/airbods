@@ -106,13 +106,13 @@ def bulk_load_values(*args, task_instance: TaskInstance, execution_date,
         connection.commit()
 
 
-def save_data(*args, task_instance: TaskInstance, **kwargs):
+def save_data(*args, task_instance: TaskInstance, execution_date, **kwargs):
     # Get result of previous task
     raw_data = task_instance.xcom_pull('all_devices_history')
 
     # Build target file path
     target_dir = pathlib.Path(airflow.models.Variable.get('datacake_raw_dir'))
-    filename = "{}.json".format(task_instance.execution_date.isoformat())
+    filename = "{}.json".format(execution_date.isoformat())
     target_path = target_dir.joinpath(filename)
 
     # Serialise
