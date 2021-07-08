@@ -81,7 +81,8 @@ def insert_deployments(*args, task_instance, test_mode: bool = False,
                 ,description  
                 ,height       
                 ,comments     
-                ,person          
+                ,person       
+                ,co2_baseline   
             )
             VALUES %s;
             """,
@@ -100,7 +101,8 @@ def insert_deployments(*args, task_instance, test_mode: bool = False,
                     dep.get('description'),
                     dep.get('height'),
                     dep.get('comments'),
-                    dep.get('person')
+                    dep.get('person'),
+                    dep.get('co2_baseline', 0)
                 )
                 for dep in deployments
             ),

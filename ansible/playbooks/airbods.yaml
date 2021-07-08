@@ -49,9 +49,11 @@
       become_user: airbods
       postgresql_query:
         db: airbods
-        query: "{{ lookup('file', '/etc/ansible/playbooks/files/create_tables.sql') }}"
+        query: "{{ lookup('file', item) }}"
         login_user: airbods
         login_password: "{{ lookup('file', '/run/secrets/database') }}"
+      with_fileglob:
+        - "database/*.sql"
 
 - name: Install Redis database
   hosts: all
@@ -138,7 +140,7 @@
         virtualenv: /opt/airflow
     - name: Install systemd services
       template:
-        src: /etc/ansible/airflow.service.j2
+        src: airflow.service.j2
         dest: "/etc/systemd/system/airflow-{{ item }}.service"
       loop: "{{ service }}"
     - name: Install Airflow configuration
