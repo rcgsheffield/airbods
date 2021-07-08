@@ -188,3 +188,20 @@ psql
 psql -c "\l"
 ```
 
+# Data pipeline management
+
+## Backfill
+
+To run these commands, you must log in as the user `airflow`:
+
+```bash
+sudo su - airflow
+```
+
+Using the Airflow CLI, use the [backfill command](https://airflow.apache.org/docs/apache-airflow/stable/dag-run.html#backfill) ([CLI backfill docs](https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html#backfill)) to run historic data pipelines:
+
+```bash
+# /opt/airflow/bin/airflow dags backfill $DAG_ID -s $START_DATE
+/opt/airflow/bin/airflow dags backfill datacake -s 2021-06-07
+```
+

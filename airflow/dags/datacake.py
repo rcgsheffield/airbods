@@ -1,4 +1,5 @@
 import datetime
+import pathlib
 import textwrap
 import json
 import logging
@@ -11,6 +12,7 @@ from operators.graphql import GraphQLHttpOperator
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.postgres.operators.postgres import PostgresOperator
+from airflow.models.taskinstance import TaskInstance
 
 LOGGER = logging.getLogger(__name__)
 
@@ -28,9 +30,12 @@ def flatten_history(devices: Iterable[dict]) -> Iterable[dict]:
     LOGGER.info('Generated %s rows', row_count)
 
 
-def bulk_load_values(*args, task_instance, test_mode: bool = False, **kwargs):
+def bulk_load_values(*args, task_instance: TaskInstance,
+                     test_mode: bool = False, **kwargs):
     # Get result of previous task
-    devices = task_instance.xcom_pull('all_devices_history')
+    raw_data = task_instance.xcom_pull('all_devices_history')
+    # Parse JSON data
+    devices = json.loads(raw_data)['data']['allDevices']
 
     # Convert GraphQL response to data rows
     rows = flatten_history(devices)
@@ -80,8 +85,24 @@ def bulk_load_values(*args, task_instance, test_mode: bool = False, **kwargs):
             page_size=1000,
         )
 
-    if not test_mode:
+    if test_mode:
+        connection.rollback()
+    else:
         connection.commit()
+
+
+def save_data(*args, task_instance: TaskInstance, **kwargs):
+    # Get result of previous task
+    raw_data = task_instance.xcom_pull('all_devices_history')
+
+    # Build target file path
+    target_dir = pathlib.Path(airflow.models.Variable.get('datacake_raw_dir'))
+    target_path = target_dir.joinpath(task_instance.job_id).joinpath('.json')
+
+    # Serialise
+    with target_path.open('w') as file:
+        file.write(raw_data)
+        LOGGER.info("Wrote '%s'", file.name)
 
 
 with airflow.DAG(
@@ -103,7 +124,7 @@ with airflow.DAG(
             verboseName
             serialNumber
             history(
-              fields: ["CO2","TEMPERATURE","AIR_QUALITY","HUMIDITY","LORAWAN_SNR","LORAWAN_DATARATE","LORAWAN_RSSI"]
+              fields: {{ var.value.datacake_fields }}
               timerangestart: "{{ ts }}"
               timerangeend: "{{ next_execution_date }}"
               resolution: "raw"
@@ -111,11 +132,16 @@ with airflow.DAG(
           {{ '}' }}
         {{ '}' }}
         """),
-        # Parse JSON response
-        response_filter=lambda response: json.loads(response.text)['data'][
-            'allDevices'],
     )
 
+    # Save raw data to disk
+    serialise_raw = PythonOperator(
+        task_id='serialise_raw',
+        python_callable=save_data,
+        provide_context=True,
+    )
+
+    # Load raw data to database
     bulk_load = PythonOperator(
         task_id='bulk_load',
         python_callable=bulk_load_values,
@@ -174,4 +200,5 @@ with airflow.DAG(
         """),
     )
 
+    all_devices_history >> serialise_raw
     all_devices_history >> bulk_load >> clean

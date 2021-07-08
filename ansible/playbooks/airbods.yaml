@@ -80,12 +80,24 @@
         state: started
     - name: Enable RabbitMQ management console
       shell: rabbitmq-plugins enable rabbitmq_management
-    - name: Create vhost
-      shell: rabbitmqctl add_vhost airbods
-    - name: Create user
-      shell: rabbitmqctl add_user airbods fWfkEq4C
-    - name: Delete guest user
-      shell: rabbitmqctl delete_user guest
+    - name: Create RabbitMQ vhost
+      #shell: rabbitmqctl add_vhost airbods
+      rabbitmq_vhost:
+        name: airbods
+    - name: Create RabbitMQ user
+      rabbitmq_user:
+        user: airbods
+        password: fWfkEq4C
+        permissions:
+          - vhost: airbods
+            read_priv: .*
+            write_priv: .*
+            configure_priv: .*
+    - name: Delete RabbitMQ guest user
+      #shell: rabbitmqctl delete_user guest
+      rabbitmq_user:
+        user: guest
+        state: absent
 
 # https://airflow.apache.org/docs/apache-airflow/stable/installation.html
 - name: Install Apache Airflow
