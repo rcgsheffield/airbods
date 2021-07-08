@@ -54,6 +54,23 @@
         login_password: "{{ lookup('file', '/run/secrets/database') }}"
       with_fileglob:
         - "database/*.sql"
+    - name: Create researcher database role
+      become: true
+      become_user: postgres
+      postgresql_user:
+        db: airbods
+        user: researcher
+        role_attr_flags: NOLOGIN
+    - name: Set researcher permissions
+      become: true
+      become_user: postgres
+      postgresql_privs:
+        role: researcher
+        db: airbods
+        schema: public
+        privs: SELECT
+        type: table
+        objs: ALL_IN_SCHEMA
 
 - name: Install Redis database
   hosts: all

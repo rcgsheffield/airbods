@@ -176,7 +176,7 @@ To use Excel to connect to the database, you need an ODBC connection or DSN. You
 8. Click "Refresh Preview" to see what the data look like
 9. Use the Power Query Editor to filter and transform data as required then click "Close & Load"
 
-# Database
+# Database administration
 
 The PostgreSQL database can be administered using [psql](https://www.postgresql.org/docs/13/app-psql.html).
 
@@ -188,7 +188,27 @@ psql
 psql -c "\l"
 ```
 
+## User management
+
+A database role exists for end users called `researcher`.
+
+Create new user credentials using the [createuser](https://www.postgresql.org/docs/current/app-createuser.html) shell command:
+
+```bash
+createuser --pwprompt --role=researcher
+```
+
+You could also do this using [CREATE ROLE](https://www.postgresql.org/docs/13/sql-createrole.html):
+
+```sql
+-- CREATE USER joe_bloggs LOGIN PASSWORD 'ChangeMe' IN ROLE researcher;
+```
+
+Role membership can also be [managed](https://www.postgresql.org/docs/13/role-membership.html) for existing users.
+
 # Data pipeline management
+
+The data pipelines are managed using [Apache Airflow](https://airflow.apache.org/docs/apache-airflow/stable/index.html).
 
 ## Backfill
 
@@ -201,7 +221,12 @@ sudo su - airflow
 Using the Airflow CLI, use the [backfill command](https://airflow.apache.org/docs/apache-airflow/stable/dag-run.html#backfill) (see [CLI backfill docs](https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html#backfill)) to run historic data pipelines:
 
 ```bash
-# /opt/airflow/bin/airflow dags backfill $DAG_ID -s $START_DATE
+# /opt/airflow/bin/airflow dags backfill $DAG_ID -s $START_DATE -t <task_regex>
 /opt/airflow/bin/airflow dags backfill datacake -s 2021-04-15 --verbose
 ```
 
+# Metadata
+
+The following are the items in the database:
+
+* `clean`
