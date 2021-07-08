@@ -120,7 +120,6 @@ def save_data(*args, task_instance: TaskInstance, execution_date, **kwargs):
     with target_path.open('w') as file:
         file.write(raw_data)
         LOGGER.info("Wrote '%s'", file.name)
-
         return file.name
 
 
