@@ -44,29 +44,46 @@ def bulk_load_values(*args, task_instance: TaskInstance,
     hook = PostgresHook('database')
     connection = hook.get_conn()
 
-    # Bulk insert values
-    # https://hakibenita.com/fast-load-data-python-postgresql#execute-values-from-iterator-with-page-size
+    table_name = 'airbods.public.raw'
+
+    context = task_instance.get_template_context()
+
+    # Insert/update values in one transaction
     with connection.cursor() as cursor:
+
+        # Delete old values
+        sql = textwrap.dedent(f"""
+        DELETE FROM {table_name}
+        WHERE time_ BETWEEN '{task_instance.execution_date}'
+            AND '{context['next_execution_date']}'
+        """)
+        LOGGER.info(sql)
+        cursor.execute(sql)
+
+        # Bulk insert values
+        # https://hakibenita.com/fast-load-data-python-postgresql#execute-values-from-iterator-with-page-size
+        sql = textwrap.dedent(f"""
+        INSERT INTO {table_name} (
+             device_id        
+            ,time_
+            ,air_quality
+            ,co2  
+            ,humidity         
+            ,temperature      
+            ,lorawan_datarate 
+            ,lorawan_rssi     
+            ,lorawan_snr      
+            ,battery          
+            ,pm1              
+            ,pm25             
+            ,pm10             
+        )
+        VALUES %s;
+        """)
+        LOGGER.info(sql)
         psycopg2.extras.execute_values(
             cur=cursor,
-            sql="""
-            INSERT INTO airbods.public.raw (
-                 device_id        
-                ,time_
-                ,air_quality
-                ,co2  
-                ,humidity         
-                ,temperature      
-                ,lorawan_datarate 
-                ,lorawan_rssi     
-                ,lorawan_snr      
-                ,battery          
-                ,pm1              
-                ,pm25             
-                ,pm10             
-            )
-            VALUES %s;
-            """,
+            sql=sql,
             argslist=((
                 row['id'],
                 row['time'],
