@@ -97,9 +97,11 @@ def save_data(*args, task_instance: TaskInstance, **kwargs):
 
     # Build target file path
     target_dir = pathlib.Path(airflow.models.Variable.get('datacake_raw_dir'))
-    target_path = target_dir.joinpath(task_instance.job_id).joinpath('.json')
+    filename = "{}.json".format(task_instance.job_id)
+    target_path = target_dir.joinpath(filename)
 
     # Serialise
+    target_dir.mkdir(parents=True, exist_ok=True)
     with target_path.open('w') as file:
         file.write(raw_data)
         LOGGER.info("Wrote '%s'", file.name)

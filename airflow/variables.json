@@ -9,7 +9,7 @@
     "LORAWAN_DATARATE",
     "LORAWAN_RSSI"
   ],
-  "datacake_raw_dir": "~/data",
+  "datacake_raw_dir": "/home/airflow/data",
   "deployments": {
     "sheet_id": "1qcWsE0EUED9W9SXPH0ojxTePrHvLQ5ZY0tfGszjXHs4",
     "tab": "Deployments"
