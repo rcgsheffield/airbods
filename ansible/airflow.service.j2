@@ -10,7 +10,7 @@
 [Unit]
 Description=Apache Airflow {{ item }}
 After=network.target
-Wants=postgresql.service redis.service
+Wants=postgresql.service redis.service rabbitmq-server.service
 
 [Service]
 Environment="PATH=/usr/bin:{{ airflow_bin_path }}"
