@@ -2,6 +2,8 @@
 
 Data pipelines and data storage for Airbods air measurement experiments.
 
+This document contains some descriptions of how the system is built and how to administer and maintain it.
+
 The data are described in the [Metadata](#Metadata) section below.
 
 # Usage
@@ -231,13 +233,20 @@ Using the Airflow CLI, use the [backfill command](https://airflow.apache.org/doc
 
 The following are the items in the database. There are two types of object: tables and views. Tables contain rows of data and views are predefined SQL queries that display, merge or process that data in a certain way.
 
+The SQL DDL used to define and create this schema is contained in SQL files in the directory [ansible/playbooks/files/database](./ansible/playbooks/files/database) and is run by the deployment script.
+
 ## Tables
 
 * `raw` contains a copy of the original data retrieved from Datacake. It unadvisable to use this data for research analysis, use `clean` or one of the views instead. Each row corresponds to a data capture reading by a sensor at a certain time. It has a timestamp column, several columns describing the sensor used and one column per metric.
 * `clean` contains the transformed data, taken from `raw`, that is ready for use
-* `device` contains one row per sensor
-  * 
+* `device` contains one row per sensor and has the following columns:
+  * `device_id` is a unique identifier created by Datacake, one per sensor entry on that platform. You can view the information about a device using its URL: `https://app.datacake.de/airbods/devices/d/<device_id>`
+  * `serial_number` is the serial number taken from the physical device. This is the best way to uniquely identify a sensor because it won't change.
+  * `verbose_name` is a human-readable label applied to each device which change over time.
+  * `object` contains a JSON object with all the additional device information stored on Datacake.
+* `deployment` contains one row for each time a sensor is moved to a new location for a period of time. There may be multiple rows per device, one for each combination of location and time period. The `serial_number` column maps to the column of the same name on the `device` table. The `start_time` is the time when the device was deployed. The `end_time` is when this deployment ended, or is blank if this deployment continues. The other columns describe the location of the deployment.
 
 ## Views
 
-* `clean_device` merges the tables `clean` and `device`.
+* `reading` merges the tables `clean`, `device` and `deployment` to present the context for each clean data row, in addition to calculating some aggregated statistics.
+* `device_deployment` merges the tables `device` and `deployment` but contains one row per sensor for *latest* deployment.
