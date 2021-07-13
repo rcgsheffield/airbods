@@ -2,6 +2,8 @@
 
 Data pipelines and data storage for Airbods air measurement experiments.
 
+The data are described in the [Metadata](#Metadata) section below.
+
 # Usage
 
 The system comprises several services.
@@ -227,6 +229,15 @@ Using the Airflow CLI, use the [backfill command](https://airflow.apache.org/doc
 
 # Metadata
 
-The following are the items in the database:
+The following are the items in the database. There are two types of object: tables and views. Tables contain rows of data and views are predefined SQL queries that display, merge or process that data in a certain way.
 
-* `clean`
+## Tables
+
+* `raw` contains a copy of the original data retrieved from Datacake. It unadvisable to use this data for research analysis, use `clean` or one of the views instead. Each row corresponds to a data capture reading by a sensor at a certain time. It has a timestamp column, several columns describing the sensor used and one column per metric.
+* `clean` contains the transformed data, taken from `raw`, that is ready for use
+* `device` contains one row per sensor
+  * 
+
+## Views
+
+* `clean_device` merges the tables `clean` and `device`.
