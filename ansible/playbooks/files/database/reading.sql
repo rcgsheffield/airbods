@@ -1,9 +1,9 @@
 /* Useful views */
--- DROP VIEW airbods.public.reading;
+DROP VIEW airbods.public.reading;
 CREATE OR REPLACE VIEW airbods.public.reading AS
 SELECT clean.device_id
-     , device.serial_number                                       AS serial_number
-     , device.verbose_name                                        AS sensor_name
+     , device.serial_number
+     , device.verbose_name
      , clean.time_                                                AS time_utc
      , clean.time_ AT time zone 'Europe/London'                   AS time_europe_london
      , deployment.city

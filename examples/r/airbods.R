@@ -28,15 +28,22 @@ con <- dbConnect(RPostgres::Postgres(),
 dbListTables(con)
 
 # Get column names for a table
-#print(dbListFields(con, 'device'))
+print(dbListFields(con, 'reading'))
 
 sql <- "
 SELECT
-   device_id
-  ,serial_number
+   serial_number
   ,verbose_name
-FROM device
-LIMIT 10
+  ,time_europe_london
+  ,area
+  ,room
+  ,air_quality
+  ,co2
+  ,humidity
+  ,temperature
+FROM reading
+WHERE time_europe_london BETWEEN '2021-07-09' AND '2021-07-10'
+  AND site LIKE '%Crucible%'
 "
 data = dbGetQuery(con, sql)
 
