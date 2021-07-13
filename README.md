@@ -6,6 +6,8 @@ This document contains some descriptions of how the system is built and how to a
 
 The data are described in the [Metadata](#Metadata) section below.
 
+Code examples are contained the the [`examples`](examples) directory.
+
 # Usage
 
 The system comprises several services.
@@ -147,7 +149,11 @@ Run automated tests:
 docker compose run --entrypoint ansible-playbook ansible /etc/ansible/playbooks/test.yaml
 ```
 
-# ODBC
+# Data access
+
+Code examples are contained the the [`examples`](examples) directory.
+
+## Open Database Connectivity (ODBC)
 
 To install the PostgreSQL ODBC driver for Windows:
 
@@ -166,7 +172,7 @@ To install the PostgreSQL ODBC driver for Windows:
       3. Username: `<your user name>`
       4. Password: `<your password>`
 
-# Excel
+## Excel
 
 To use Excel to connect to the database, you need an ODBC connection or DSN. You need the ODBC driver for PostgreSQL installed to do this.
 
@@ -176,7 +182,7 @@ To use Excel to connect to the database, you need an ODBC connection or DSN. You
 4. Click "From ODBC"
 5. Under "Data source name (DSN)" select "PostreSQL35W" and click "OK"
 6. Open the folders: `airbods` then `public` 
-7. Select `clean_device` and click "Edit" to customise the query (to avoid downloading the entire database)
+7. Select `reading` (or another item) and click "Edit" to customise the query (to avoid downloading the entire database)
 8. Click "Refresh Preview" to see what the data look like
 9. Use the Power Query Editor to filter and transform data as required then click "Close & Load"
 
@@ -248,5 +254,10 @@ The SQL DDL used to define and create this schema is contained in SQL files in t
 
 ## Views
 
-* `reading` merges the tables `clean`, `device` and `deployment` to present the context for each clean data row, in addition to calculating some aggregated statistics.
-* `device_deployment` merges the tables `device` and `deployment` but contains one row per sensor for *latest* deployment.
+* `reading` merges the tables `clean`, `device` and `deployment` to present the context for each clean data row, in addition to calculating some aggregated statistics. The deployment information is taken from the relevant deployment for that sensor at the time the reading was recorded. It contains the following columns:
+  * `serial_number` is the sensor identifier.
+  * `time_utc` and `time_europe_london` is the time of each reading, displayed in each time zone
+  * `city`, `site`, `area` etc. are columns from the `deployment` table describing the sensor location.
+  * `air_quality`, `co2` and other physical measurements
+  * `co2_room_min`, `humidity_area_mean`, `temperature_room_max` and other similar columns contain the aggregate statistics for each metric, partitioned over the a location (room or area). The aggregate functions are the minimum `min`, average `mean` and maximum `max` for that deployment.
+* `device_deployment` merges the tables `device` and `deployment` but contains one row per sensor for *latest* deployment. The columns are the same as those on the two source tables.
