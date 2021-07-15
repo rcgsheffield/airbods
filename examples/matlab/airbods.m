@@ -12,7 +12,8 @@
 % Connect to the database
 datasource = "Airbods Dev";
 username = "airbods";
-conn = postgresql(datasource, username, 'PASSWORD');
+password = input('Enter password: ', 's');
+conn = postgresql(datasource, username, password);
 
 % Explore the schema
 tablename = "device";
