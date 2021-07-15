@@ -28,10 +28,10 @@
       copy:
         src: postgresql.conf
         dest: /etc/postgresql/12/main/postgresql.conf
-    - name: Ensure PostgreSQL service is running
+    - name: Restart PostgreSQL service
       service:
         name: postgresql
-        state: started
+        state: restarted
     - name: Create Airbods database user
       become: true
       become_user: postgres
@@ -79,10 +79,10 @@
     - name: Install Redis package
       apt:
         name: redis
-    - name: Ensure Redis is running
+    - name: Restart Redis service
       service:
         name: redis
-        state: started
+        state: restarted
 
 # Why You Should use Celery with RabbitMQ
 # https://www.section.io/engineering-education/why-you-should-use-celery-with-rabbitmq/
@@ -93,10 +93,10 @@
     - name: Install RabbitMQ package
       apt:
         name: rabbitmq-server
-    - name: Start RabbitMQ service
+    - name: Restart RabbitMQ service
       systemd:
         name: rabbitmq-server
-        state: started
+        state: restarted
     - name: Enable RabbitMQ management console
       shell: rabbitmq-plugins enable rabbitmq_management
     - name: Create RabbitMQ vhost
@@ -205,10 +205,10 @@
       community.postgresql.postgresql_db:
         name: airflow
         owner: airflow
-    - name: Start Airflow systemd services
+    - name: Restart Airflow services
       systemd:
         name: "airflow-{{ item }}"
-        state: started
+        state: restarted
         daemon_reload: true
       loop: "{{ service }}"
     - name: Initialise Airflow database
