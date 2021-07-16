@@ -220,13 +220,23 @@ Role membership can also be [managed](https://www.postgresql.org/docs/13/role-me
 
 The data pipelines are managed using [Apache Airflow](https://airflow.apache.org/docs/apache-airflow/stable/index.html).
 
-## Backfill
+## Airflow command line interface
 
 To run these commands, you must log in as the user `airflow`:
 
 ```bash
 sudo su - airflow
 ```
+
+## Clear
+
+The state of failed tasks may be cleared using the GUI under Browse > DAG Runs. You can also use the CLI with the [tasks clear](https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html#clear) command. This may be applied to an entire DAG run, or a subset of tasks, for a specified time range.
+
+```bash
+/opt/airflow/bin/airflow tasks clear $DAG_ID --start-date "YYYY-MM-DD" --end-date "YYYY-MM-DD"
+```
+
+## Backfill
 
 Using the Airflow CLI, use the [backfill command](https://airflow.apache.org/docs/apache-airflow/stable/dag-run.html#backfill) (see [CLI backfill docs](https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html#backfill)) to run historic data pipelines:
 

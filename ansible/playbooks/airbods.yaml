@@ -28,6 +28,26 @@
       copy:
         src: postgresql.conf
         dest: /etc/postgresql/12/main/postgresql.conf
+    # postgresql.conf ssl_cert_file
+    - name: Install certificate
+      copy:
+        src: airbods_shef_ac_uk.cer
+        dest: /etc/ssl/certs/airbods_shef_ac_uk.cer
+    # postgresql.conf ssl_key_file
+    - name: Install certificate key
+      copy:
+        src: /run/secrets/ssl_key
+        dest: /etc/ssl/private/airbods_shef_ac_uk.key
+        group: ssl-cert
+        mode: "640"
+    # postgresql.conf ssl_passphrase_command
+    - name: Install SSL key password
+      copy:
+        content: "{{ lookup('file', '/run/secrets/database') }}"
+        dest: /home/postgres/ssl_key.txt
+        owner: postgres
+        group: postgres
+        mode: "600"
     - name: Restart PostgreSQL service
       service:
         name: postgresql

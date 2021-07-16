@@ -55,6 +55,8 @@ services:
       - postgres
       - sql_alchemy_conn_localhost
       - database
+      - ssl_key
+      - ssl_key_password
 
   # Research data storage
   database:
@@ -157,9 +159,11 @@ secrets:
   airflow:
     file: secrets/airflow.txt
   ssl_cert:
-    file: secrets/ssl_cert.crt
+    file: secrets/airbods_shef_ac_uk.cer
   ssl_key:
-    file: secrets/ssl_key.key
+    file: secrets/airbods_shef_ac_uk.key
+  ssl_key_password:
+    file: secrets/airbods_shef_ac_uk.key.txt
   ssh_key:
     file: secrets/id_rsa
   connections:
