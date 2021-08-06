@@ -8,6 +8,10 @@ The data are described in the [Metadata](#Metadata) section below.
 
 Code examples are contained the the [`examples`](examples) directory.
 
+# Overview
+
+[Architecture diagram](https://drive.google.com/file/d/1gzuFhhOR7JmASPKYVPKwvyLrUiUHpojA/view?usp=sharing)
+
 # Usage
 
 The system comprises several services.
@@ -18,6 +22,8 @@ The system comprises several services.
 systemctl status airflow-webserver
 systemctl status airflow-scheduler
 systemctl status airflow-worker
+systemctl status postgresql
+systemctl status redis
 ```
 
 ## View logs
@@ -32,6 +38,8 @@ sudo journalctl -u airflow-scheduler --since "$(date -I) 12:00"
 pg_lsclusters
 
 # View PostgreSQL logs
+sudo systemctl status postgresql
+sudo ls -l /var/log/postgresql
 sudo tail /var/log/postgresql/postgresql-12-main.log
 ```
 

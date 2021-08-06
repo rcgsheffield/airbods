@@ -71,11 +71,10 @@ def insert_deployments(*args, task_instance, test_mode: bool = False,
             ,start_time   
             ,end_time     
             ,verbose_name         
-            ,city         
-            ,site         
-            ,area         
-            ,floor        
-            ,room         
+            ,city
+            ,site
+            ,area
+            ,floor
             ,zone         
             ,description  
             ,height       
@@ -99,7 +98,6 @@ def insert_deployments(*args, task_instance, test_mode: bool = False,
                     dep.get('site'),
                     dep.get('area'),
                     dep.get('floor'),
-                    dep.get('room'),
                     dep.get('zone'),
                     dep.get('description'),
                     dep.get('height'),
