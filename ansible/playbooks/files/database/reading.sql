@@ -22,26 +22,26 @@ SELECT clean.device_id
      , clean.co2 - COALESCE(deployment.co2_baseline, 0)           AS co2_excess
      , clean.humidity
      , clean.temperature
-     -- Room averages
-     , MIN(clean.co2) OVER (PARTITION BY deployment.room)         AS co2_room_min
-     , MIN(clean.humidity) OVER (PARTITION BY deployment.room)    AS humidity_room_min
-     , MIN(clean.temperature) OVER (PARTITION BY deployment.room) AS temperature_room_min
-     , AVG(clean.co2) OVER (PARTITION BY deployment.room)         AS co2_room_mean
-     , AVG(clean.humidity) OVER (PARTITION BY deployment.room)    AS humidity_room_mean
-     , AVG(clean.temperature) OVER (PARTITION BY deployment.room) AS temperature_room_mean
-     , MAX(clean.co2) OVER (PARTITION BY deployment.room)         AS co2_room_max
-     , MAX(clean.humidity) OVER (PARTITION BY deployment.room)    AS humidity_room_max
-     , MAX(clean.temperature) OVER (PARTITION BY deployment.room) AS temperature_room_max
      -- Area averages
-     , MIN(clean.co2) OVER (PARTITION BY deployment.area)         AS co2_area_min
-     , MIN(clean.humidity) OVER (PARTITION BY deployment.area)    AS humidity_area_min
-     , MIN(clean.temperature) OVER (PARTITION BY deployment.area) AS temperature_area_min
-     , AVG(clean.co2) OVER (PARTITION BY deployment.area)         AS co2_area_mean
-     , AVG(clean.humidity) OVER (PARTITION BY deployment.area)    AS humidity_area_mean
-     , AVG(clean.temperature) OVER (PARTITION BY deployment.area) AS temperature_area_mean
-     , MAX(clean.co2) OVER (PARTITION BY deployment.area)         AS co2_area_max
-     , MAX(clean.humidity) OVER (PARTITION BY deployment.area)    AS humidity_area_max
-     , MAX(clean.temperature) OVER (PARTITION BY deployment.area) AS temperature_area_max
+     , MIN(clean.co2) OVER (PARTITION BY deployment.area, clean.time_::DATE)         AS co2_area_min
+     , MIN(clean.humidity) OVER (PARTITION BY deployment.area, clean.time_::DATE)    AS humidity_area_min
+     , MIN(clean.temperature) OVER (PARTITION BY deployment.area, clean.time_::DATE) AS temperature_area_min
+     , AVG(clean.co2) OVER (PARTITION BY deployment.area, clean.time_::DATE)         AS co2_area_mean
+     , AVG(clean.humidity) OVER (PARTITION BY deployment.area, clean.time_::DATE)    AS humidity_area_mean
+     , AVG(clean.temperature) OVER (PARTITION BY deployment.area, clean.time_::DATE) AS temperature_area_mean
+     , MAX(clean.co2) OVER (PARTITION BY deployment.area, clean.time_::DATE)         AS co2_area_max
+     , MAX(clean.humidity) OVER (PARTITION BY deployment.area, clean.time_::DATE)    AS humidity_area_max
+     , MAX(clean.temperature) OVER (PARTITION BY deployment.area, clean.time_::DATE) AS temperature_area_max
+     -- Zone averages
+     , MIN(clean.co2) OVER (PARTITION BY deployment.zone, clean.time_::DATE)         AS co2_zone_min
+     , MIN(clean.humidity) OVER (PARTITION BY deployment.zone, clean.time_::DATE)    AS humidity_zone_min
+     , MIN(clean.temperature) OVER (PARTITION BY deployment.zone, clean.time_::DATE) AS temperature_zone_min
+     , AVG(clean.co2) OVER (PARTITION BY deployment.zone, clean.time_::DATE)         AS co2_zone_mean
+     , AVG(clean.humidity) OVER (PARTITION BY deployment.zone, clean.time_::DATE)    AS humidity_zone_mean
+     , AVG(clean.temperature) OVER (PARTITION BY deployment.zone, clean.time_::DATE) AS temperature_zone_mean
+     , MAX(clean.co2) OVER (PARTITION BY deployment.zone, clean.time_::DATE)         AS co2_zone_max
+     , MAX(clean.humidity) OVER (PARTITION BY deployment.zone, clean.time_::DATE)    AS humidity_zone_max
+     , MAX(clean.temperature) OVER (PARTITION BY deployment.zone, clean.time_::DATE) AS temperature_zone_max
 FROM airbods.public.clean
          INNER JOIN airbods.public.device ON clean.device_id = device.device_id
          LEFT JOIN airbods.public.deployment

@@ -277,5 +277,5 @@ The SQL DDL used to define and create this schema is contained in SQL files in t
   * `time_utc` and `time_europe_london` is the time of each reading, displayed in each time zone
   * `city`, `site`, `area` etc. are columns from the `deployment` table describing the sensor location.
   * `air_quality`, `co2` and other physical measurements
-  * `co2_room_min`, `humidity_area_mean`, `temperature_room_max` and other similar columns contain the aggregate statistics for each metric, partitioned over the a location (room or area). The aggregate functions are the minimum `min`, average `mean` and maximum `max` for that deployment.
+  * `co2_room_min`, `humidity_area_mean`, `temperature_room_max` and other similar columns contain the aggregate statistics for each metric, partitioned over the location and day. The aggregate functions are the minimum `min`, average `mean` and maximum `max` for that deployment.
 * `device_deployment` merges the tables `device` and `deployment` but contains one row per sensor for *latest* deployment. The columns are the same as those on the two source tables.
