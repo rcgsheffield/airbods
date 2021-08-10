@@ -179,39 +179,6 @@ ansible-playbook --inventory hosts.yaml test.yaml
 
 Code examples are contained the the [`examples`](examples) directory.
 
-## Open Database Connectivity (ODBC)
-
-To install the PostgreSQL ODBC driver for Windows:
-
-1. Visit the [psqlODBC - PostgreSQL ODBC driver](https://odbc.postgresql.org/) page
-2. Click on the [PostgreSQL downloads site](http://www.postgresql.org/ftp/odbc/versions/)
-3. For Windows, select `msi`
-4. Scroll down to the latest version, which is `psqlodbc_13_01_0000.zip` at the time of writing
-5. Download and install this driver
-6. Open the ODBC Data Source Administrator via the start menu or by running `odbcad32`
-7. Create a DSN:
-   1. Click "Add"
-   2. Select "PostgreSQL Unicode" and click "Finish"
-   3. Enter the following values:
-      1. Database: `airbods`
-      2. Server: `airbods.shef.ac.uk`
-      3. Username: `<your user name>`
-      4. Password: `<your password>`
-
-## Excel
-
-To use Excel to connect to the database, you need an ODBC connection or DSN. You need the ODBC driver for PostgreSQL installed to do this.
-
-1. Open the "Data" tab
-2. Click "New Query"
-3. Click "From Other Sources"
-4. Click "From ODBC"
-5. Under "Data source name (DSN)" select "PostreSQL35W" and click "OK"
-6. Open the folders: `airbods` then `public` 
-7. Select `reading` (or another item) and click "Edit" to customise the query (to avoid downloading the entire database)
-8. Click "Refresh Preview" to see what the data look like
-9. Use the Power Query Editor to filter and transform data as required then click "Close & Load"
-
 # Database administration
 
 The PostgreSQL database can be administered using [psql](https://www.postgresql.org/docs/13/app-psql.html).
