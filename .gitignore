@@ -132,3 +132,4 @@ dmypy.json
 logs/
 secrets/
 .ssh
+.ansible

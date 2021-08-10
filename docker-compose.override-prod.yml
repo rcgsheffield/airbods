@@ -1,6 +1,0 @@
-# Production environment
-version: "3.8"
-services:
-  ansible:
-    volumes:
-      - ./ansible/hosts-prod.yaml:/etc/ansible/hosts

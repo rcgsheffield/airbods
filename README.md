@@ -1,16 +1,51 @@
 # Airbods
 
-Data pipelines and data storage for Airbods air measurement experiments.
+Data pipelines and data storage for Airbods air measurement experiments. The primary data pipeline downloads all the raw data available on a single Datacake "workspace" (specified by its unique identifier) and copies those data onto a database. It then transforms that data to make a "clean" data set available for research use.
 
 This document contains some descriptions of how the system is built and how to administer and maintain it.
 
 The data are described in the [Metadata](#Metadata) section below.
 
-Code examples are contained the the [`examples`](examples) directory.
+Code examples are contained the the [`examples`](examples) directory that can be used to retrieve data in various languages.
+
+Most of the examples shown below refer to the development environment deployed on the virtual machine at `airbodsdev.shef.ac.uk` because it is "safe" to access this. The real service will run on the production instance at `airbods.shef.ac.uk`.
 
 # Overview
 
-[Architecture diagram](https://drive.google.com/file/d/1gzuFhhOR7JmASPKYVPKwvyLrUiUHpojA/view?usp=sharing)
+The system comprises two major parts:
+
+* **Workflow Orchestrator:** The data pipelines are implemented using a workflow orchestrator called [Apache Airflow](https://airflow.apache.org/).
+* **Database:** The data are stored in a relational database management system implemented using [PostgreSQL](https://www.postgresql.org/).
+
+There is a simple overview of this in the [architecture diagram](https://drive.google.com/file/d/1gzuFhhOR7JmASPKYVPKwvyLrUiUHpojA/view?usp=sharing). The workflow orchestrator comprises the subcomponents inside the black dotted line. The user roles are represented by red person icons. The cloud services are shown as blue clouds. The services are represented as green rectangles. The databases are shown as yellow cylinders.
+
+There are three typical user roles:
+
+* End user (researcher) will access the SQL database using a certain security role.
+* Data engineer will access the workflow orchestrator using its web portal.
+* A system administrator will access the virtual machine(s) on which the system runs.
+
+## Workflow orchestrator
+
+The data pipelines are defined using three directed acyclic graphs (DAGs) that are defined in `airflow/dags/*.py`.
+
+* `datacake` downloads, stores and transforms data retrieved via the Datacake API.
+* `datacake_devices` retrieves and stores metadata about sensors from the Datacake API
+* `deployments` retrieves and stores information about sensors and their deployments at certain locations from a Google Sheets spreadsheet.
+
+The configuration for these is stored in `airflow/variables.json`.
+
+There is a custom operator used to access [GraphQL](https://graphql.org/) APIs via HTTP in `airflow/plugins/operators/graphql.py` that is used in the workflows that interact with Datacake, which exposes this kind of API.
+
+## Database
+
+The RDMS service contains three databases:
+
+* `airbods` contains the research data and is accessible by the end users. The tables are described in the metadata section below.
+* `airflow` contains the metadata and system data for the workflow orchestrator. This may be accessed by the user account (role) named `airflow`.
+* `postgres` contains system data for the database service itself
+
+The database settings are specified in the Ansible playbook and the configuration files `postgresql.conf` and `pg_hba.conf` as discussed in the [PostgreSQL  12 documentation](https://www.postgresql.org/docs/12/index.html).
 
 # Usage
 
@@ -45,7 +80,7 @@ sudo tail /var/log/postgresql/postgresql-12-main.log
 
 ## Airflow CLI
 
-Airflow [Using the Command Line Interface](http://airflow.apache.org/docs/apache-airflow/stable/usage-cli.html#)
+You can use the Airflow [Using the Command Line Interface](http://airflow.apache.org/docs/apache-airflow/stable/usage-cli.html#) to view, control and administer the workflow orchestrator. You should run this tool as the service user `airflow` or as `root`.
 
 ```bash
 # Log in as system user
@@ -60,33 +95,25 @@ sudo su - airflow
 /opt/airflow/bin/airflow dags list
 ```
 
+## Airflow web interface
+
+The is an Airflow GUI available via the [webserver](https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html) service available at http://airbodsdev.shef.ac.uk.
+
 ## Worker monitoring
 
 You can look at the workers using [Flower](https://flower.readthedocs.io/en/latest/), a celery monitoring tool.
 
-1. SSH tunnel to port 5555 to 127.0.0.1:5555
-2. Open `http://localhost:5555/`
+SSH tunnel to port 5555 to 127.0.0.1:5555 (this can be done using the command `ssh -L 5555 :127.0.0.1:5555 $USER@airbodsdev.shef.ac.uk`). Then open `http://localhost:5555/` in a web browser on your computer.
 
 ## Message broker management console
 
-SSH tunnel 15672 to 127.0.0.1:15672
-
-```
-http://localhost:15672/
-```
-
-## Container environment
-
-This is for development purposes only.
+SSH tunnel port 15672 on the remote machine 127.0.0.1:15672 using the `ssh` command or `putty`.
 
 ```bash
-# Build images (and update remote images)
-docker-compose build --pull
-# Start services
-docker-compose up -d --remove-orphans
-# View status
-docker-compose ps
+ssh -L 15672:127.0.0.1:15672 $USER@airbodsdev.shef.ac.uk
 ```
+
+Then open http://localhost:15672/ on your local machine.
 
 # Testing
 
@@ -95,66 +122,57 @@ See [Testing a DAG](https://airflow.apache.org/docs/apache-airflow/stable/best-p
 To check that the DAG code may be imported:
 
 ```bash
-docker-compose exec worker python dags/datacake.py
+python dags/datacake.py
 ```
 
 Test a specific task:
 
 ```bash
-# docker-compose exec <service> airflow task test <dag_id> <task_id> <date>
-docker-compose exec worker airflow tasks test datacake all_devices_history 2021-06-01
+airflow task test <dag_id> <task_id> <date>
+airflow tasks test datacake all_devices_history 2021-06-01
 ```
 
 Run unit tests:
 
 ```bash
-docker-compose exec worker python -m unittest --failfast
+python -m unittest --failfast
 ```
 
 # Deployment
 
 Ansible [Executing playbooks for troubleshooting](https://docs.ansible.com/ansible/latest/user_guide/playbooks_startnstep.html)
 
-The private key must be installed and configured on the target machine so that the control node may connect using SSH. For example:
-
-```bash
-sa_cs1jsth@airbodsdev:~$ sudo ls -l /root/.ssh
--rw-r--r-- 1 root root 109 Jun 22 16:35 authorized_keys
--rw------- 1 root root 464 Jun 22 16:35 id_rsa
-sa_cs1jsth@airbodsdev:~$ ls -l /home/airflow/.ssh
--rw-r--r-- 1 airflow airflow 109 Jun 24 12:54 authorized_keys
--rw------- 1 airflow airflow 464 Jun 24 12:54 id_rsa
-```
+The private key must be installed and configured on the target machine so that the control node may connect using SSH. The `ida_rsa` file is that user's private key. The `authorized_keys` file is used to list the public keys that can automatically connect. These files would be stored in the directory `~/.ssh` for the user you use to connect. The same configuration is also required for the `root` user in the directory `/root/.ssh`.
 
 Check Ansible is working:
 
 ```bash
 # View Ansible package version
-docker compose run ansible --version
+ansible --version
 
 # View inventory
-docker compose run ansible all --list-hosts
+ansible --inventory hosts.yaml --list-hosts all
 
 # Ping nodes
-docker compose run ansible all -m ping
+ansible --inventory hosts.yaml --user $USER -m ping all
 
 # Run a custom command
-docker compose run ansible all -a "echo OK"
+ansible --inventory hosts.yaml --user $USER -a "echo OK" all
 
 # Check a playbook
-docker compose run --entrypoint ansible-playbook ansible --check /etc/ansible/playbooks/test.yaml
+ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass airbods.yaml --check
 ```
 
 Install services:
 
 ```bash
-docker compose run --entrypoint ansible-playbook ansible /etc/ansible/playbooks/airbods.yaml
+ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass airbods.yaml
 ```
 
 Run automated tests:
 
 ```bash
-docker compose run --entrypoint ansible-playbook ansible /etc/ansible/playbooks/test.yaml
+ansible-playbook --inventory hosts.yaml test.yaml
 ```
 
 # Data access
@@ -257,7 +275,7 @@ Using the Airflow CLI, use the [backfill command](https://airflow.apache.org/doc
 
 The following are the items in the database. There are two types of object: tables and views. Tables contain rows of data and views are predefined SQL queries that display, merge or process that data in a certain way.
 
-The SQL DDL used to define and create this schema is contained in SQL files in the directory [ansible/playbooks/files/database](./ansible/playbooks/files/database) and is run by the deployment script.
+The SQL DDL used to define and create this schema is contained in SQL files in the directory [ansible/playbooks/files/database](files/database) and is run by the deployment script.
 
 ## Tables
 

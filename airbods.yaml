@@ -1,21 +1,32 @@
 ---
+# Ansible playbook
 # This playbook defines tasks to deploy the application stack
+#
+# Table of contents:
+#  * Install PostgreSQL database
+#  * Install Redis database
+#  * Install RabbitMQ message broker
+#  * Install Apache Airflow
 
 - name: Install PostgreSQL database
   hosts: all
+  # This is required because we can't sudo as postgres user
   remote_user: root
-  tasks:
+  pre_tasks:
     - name: Install postgresql package
       apt:
-        name: postgresql
+        name: postgresql-12
     - name: Create Airbods system user
       user:
         name: airbods
         system: yes
+    # Python library that will allow us to use Ansible PostgreSQL modules
+    # Pre-requisite for Ansible PostgreSQL tasks
     - name: Install psycopg2
       pip:
         name:
           - psycopg2-binary
+  tasks:
     - name: Install PostgreSQL auth config
       copy:
         src: pg_hba.conf
@@ -23,7 +34,7 @@
     - name: Create postgres user
       user:
         name: postgres
-        password: "{{ lookup('file', '/run/secrets/postgres') | password_hash('sha512') }}"
+        password: "{{ lookup('file', 'secrets/postgres.txt') | password_hash('sha512') }}"
     - name: Install PostgreSQL configuration
       copy:
         src: postgresql.conf
@@ -36,32 +47,30 @@
     # postgresql.conf ssl_key_file
     - name: Install certificate key
       copy:
-        src: /run/secrets/ssl_key
+        src: secrets/airbods_shef_ac_uk.key
         dest: /etc/ssl/private/airbods_shef_ac_uk.key
         group: ssl-cert
-        mode: "640"
+        mode: 0640
     # postgresql.conf ssl_passphrase_command
     - name: Install SSL key password
       copy:
-        content: "{{ lookup('file', '/run/secrets/database') }}"
+        content: "{{ lookup('file', 'secrets/database.txt') }}"
         dest: /home/postgres/ssl_key.txt
         owner: postgres
         group: postgres
-        mode: "600"
-    - name: Restart PostgreSQL service
-      service:
-        name: postgresql
-        state: restarted
+        mode: 0600
     - name: Create Airbods database user
       become: true
       become_user: postgres
-      community.postgresql.postgresql_user:
+      postgresql_user:
         user: airbods
-        password: "{{ lookup('file', '/run/secrets/database') }}"
+        password: "{{ lookup('file', 'secrets/database.txt') }}"
+        #login_user: postgres
+        #login_password: "{{ lookup('file', 'secrets/postgres.txt') }}"
     - name: Create Airbods database
       become: true
       become_user: postgres
-      community.postgresql.postgresql_db:
+      postgresql_db:
         name: airbods
         owner: airbods
     - name: Create Airbods database structure
@@ -71,7 +80,7 @@
         db: airbods
         query: "{{ lookup('file', item) }}"
         login_user: airbods
-        login_password: "{{ lookup('file', '/run/secrets/database') }}"
+        login_password: "{{ lookup('file', 'secrets/database.txt') }}"
       with_fileglob:
         - "database/*.sql"
     - name: Create researcher database role
@@ -91,14 +100,20 @@
         privs: SELECT
         type: table
         objs: ALL_IN_SCHEMA
+  handlers:
+    - name: Restart PostgreSQL service
+      service:
+        name: postgresql
+        state: restarted
 
 - name: Install Redis database
   hosts: all
-  remote_user: root
+  become: yes
   tasks:
     - name: Install Redis package
       apt:
         name: redis
+  handlers:
     - name: Restart Redis service
       service:
         name: redis
@@ -108,20 +123,22 @@
 # https://www.section.io/engineering-education/why-you-should-use-celery-with-rabbitmq/
 - name: Install RabbitMQ message broker
   hosts: all
-  remote_user: root
+  become: yes
   tasks:
     - name: Install RabbitMQ package
       apt:
         name: rabbitmq-server
-    - name: Restart RabbitMQ service
+    - name: Start RabbitMQ service
       systemd:
         name: rabbitmq-server
-        state: restarted
+        state: started
     - name: Enable RabbitMQ management console
       shell: rabbitmq-plugins enable rabbitmq_management
     - name: Create RabbitMQ vhost
       rabbitmq_vhost:
         name: airflow
+    # This task seems to be problematic with older versions of Ansible
+    # https://github.com/ansible-collections/community.rabbitmq/issues/52
     - name: Create RabbitMQ user
       rabbitmq_user:
         user: airflow
@@ -135,16 +152,21 @@
       rabbitmq_user:
         user: guest
         state: absent
+  handlers:
+    - name: Restart RabbitMQ service
+      systemd:
+        name: rabbitmq-server
+        state: restarted
 
 # https://airflow.apache.org/docs/apache-airflow/stable/installation.html
 - name: Install Apache Airflow
   hosts: all
   remote_user: root
-  tasks:
+  pre_tasks:
     - name: Create airflow system user
       user:
         name: airflow
-        password: "{{ lookup('file', '/run/secrets/airflow') | password_hash('sha512') }}"
+        password: "{{ lookup('file', 'secrets/airflow.txt') | password_hash('sha512') }}"
         system: yes
     - name: Create Airflow group
       group:
@@ -175,6 +197,7 @@
           - apache-airflow-providers-google==3.0.*
           - apache-airflow-providers-http==2.0.*
         virtualenv: /opt/airflow
+  tasks:
     - name: Install systemd services
       template:
         src: airflow.service.j2
@@ -194,21 +217,21 @@
         group: airflow
     - name: Install connection string
       copy:
-        src: /run/secrets/sql_alchemy_conn_localhost
+        src: secrets/sql_alchemy_conn_localhost.txt
         dest: "{{ secrets_dir }}/sql_alchemy_conn_localhost.txt"
         owner: airflow
         group: airflow
-        mode: '0400'
+        mode: 0400
     - name: Install Airflow connections
       copy:
-        src: /run/secrets/connections
+        src: secrets/connections.json
         dest: "{{ secrets_dir }}/connections.json"
         owner: airflow
         group: airflow
-        mode: '0400'
+        mode: 0400
     - name: Install Airflow variables
       copy:
-        src: /run/secrets/variables
+        src: secrets/variables.json
         dest: "{{ secrets_dir }}/variables.json"
         group: airflow
         owner: airflow
@@ -216,23 +239,18 @@
     - name: Create airflow database user
       become: true
       become_user: postgres
-      community.postgresql.postgresql_user:
+      postgresql_user:
         user: airflow
-        password: "{{ lookup('file', '/run/secrets/airflow') }}"
+        password: "{{ lookup('file', 'secrets/airflow.txt') }}"
     - name: Create airflow database
       become: true
       become_user: postgres
-      community.postgresql.postgresql_db:
+      postgresql_db:
         name: airflow
         owner: airflow
-    - name: Restart Airflow services
-      systemd:
-        name: "airflow-{{ item }}"
-        state: restarted
-        daemon_reload: true
-      loop: "{{ service }}"
     - name: Initialise Airflow database
-      remote_user: airflow
+      become: yes
+      become_user: airflow
       # "initdb is also idempotent, so this can be run as often as you
       # choose to, without needing to worry about the database changing."
       # https://stackoverflow.com/a/59560731
@@ -248,7 +266,7 @@
           - "--username"
           - "airflow"
           - "--password"
-          - "{{ lookup('file', '/run/secrets/airflow') }}"
+          - "{{ lookup('file', 'secrets/airflow.txt') }}"
           - "--firstname"
           - "admin"
           - "--lastname"
@@ -258,18 +276,27 @@
           - "--email"
           - "airbods@sheffield.ac.uk"
     - name: Install Airflow content
-      remote_user: airflow
+      become: yes
+      become_user: airflow
       copy:
         src: "{{ item }}"
         dest: "{{ airflow_home }}"
       loop:
-        - /home/ansible/airflow/dags
-        - /home/ansible/airflow/plugins
-        - /home/ansible/airflow/tests
-        - /home/ansible/airflow/variables.json
+        - airflow/dags
+        - airflow/plugins
+        - airflow/tests
+        - airflow/variables.json
     - name: Import variables
-      remote_user: airflow
+      become: yes
+      become_user: airflow
       shell: "{{ airflow_bin_path }}/airflow variables import {{ airflow_home }}/variables.json"
       tags:
         - dev
+  handlers:
+    - name: Restart Airflow services
+      systemd:
+        name: "airflow-{{ item }}"
+        state: restarted
+        daemon_reload: true
+      loop: "{{ service }}"
 ...
