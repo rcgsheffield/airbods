@@ -1,10 +1,12 @@
 ---
 - name: Test Airflow DAGs
   hosts: all
-  remote_user: airflow
+  remote_user: root
   tasks:
     - name: Test DAGs
       shell: "{{ airflow_bin_path }}/airflow dags test {{ item }} {{ ansible_date_time.date }}"
+      become: yes
+      become_user: airflow
       loop:
         - datacake_devices
         - datacake

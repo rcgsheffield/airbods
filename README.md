@@ -172,7 +172,7 @@ ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass airbods.y
 Run automated tests:
 
 ```bash
-ansible-playbook --inventory hosts.yaml test.yaml
+ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass test.yaml
 ```
 
 # Data access

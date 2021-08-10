@@ -118,8 +118,8 @@ def insert_deployments(*args, task_instance, test_mode: bool = False,
 
 with airflow.DAG(
         dag_id='deployments',
-        # Project 16th April 2021 to November 2022
-        start_date=datetime.datetime(2021, 4, 15),
+        # This isn't time-dependent
+        start_date=airflow.utils.dates.days_ago(1),
         schedule_interval=datetime.timedelta(days=1),
 ) as dag:
     deployments_info = Variable.get('deployments', deserialize_json=True)
