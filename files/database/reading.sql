@@ -49,10 +49,14 @@ SELECT
      , MAX(clean.humidity) OVER (PARTITION BY deployment.zone, clean.time_::DATE)    AS humidity_zone_max
      , MAX(clean.temperature) OVER (PARTITION BY deployment.zone, clean.time_::DATE) AS temperature_zone_max
 
-     -- CO2 rolling average over last 10 minutes per zone
+     -- CO2 rolling average over last "10 minutes" per zone
      , AVG(clean.co2) OVER (PARTITION BY deployment.zone ORDER BY clean.time_
     ROWS BETWEEN 5 PRECEDING AND CURRENT ROW)                                        AS co2_mean_rolling_5_rows
-
+     -- CO2 rolling hourly minimum and maximum per zone
+    ,MIN(clean.co2) OVER (PARTITION BY deployment.zone ORDER BY clean.time_
+        ROWS BETWEEN 30 PRECEDING AND CURRENT ROW)                                        AS co2_min_rolling_30_rows
+    ,MAX(clean.co2) OVER (PARTITION BY deployment.zone ORDER BY clean.time_
+        ROWS BETWEEN 30 PRECEDING AND CURRENT ROW)                                        AS co2_max_rolling_30_rows
 FROM airbods.public.clean
          -- If no sensor is found, leave blank columns
          LEFT JOIN airbods.public.device ON clean.device_id = device.device_id
