@@ -1,0 +1,14 @@
+---
+# Routine maintenance script
+
+# Plays
+- name: Upgrade packages
+  become: yes
+  apt:
+    update_cache: yes
+    upgrade: full
+
+# https://www.postgresql.org/docs/current/maintenance.html
+- name: PostgreSQL routine maintenance
+
+...
