@@ -279,3 +279,15 @@ The SQL DDL used to define and create this schema is contained in SQL files in t
 
 ## System resource utilisation
 
+Task summary
+
+```bash
+top
+```
+
+Memory usage in MB:
+
+```bash
+free --mega
+```
+
