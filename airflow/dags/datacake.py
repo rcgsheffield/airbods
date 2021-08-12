@@ -125,7 +125,8 @@ def save_data(*args, task_instance: TaskInstance, execution_date, **kwargs):
 
 with airflow.DAG(
         dag_id='datacake',
-        start_date=datetime.datetime(2021, 6, 7,
+        # Data collection start date 14th April 2021
+        start_date=datetime.datetime(2021, 4, 14,
                                      tzinfo=datetime.timezone.utc),
         schedule_interval=datetime.timedelta(hours=1),
 ) as dag:
