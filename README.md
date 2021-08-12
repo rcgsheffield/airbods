@@ -86,40 +86,29 @@ ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass test.yaml
 
 # Usage
 
-The system comprises several services which are managed using `systemd`.
+## SQL database
 
-## View service status
-
-You can view the status of the services using the following commands:
+The database service may be controlled using `systemd`:
 
 ```bash
-systemctl status airflow-webserver
-systemctl status airflow-scheduler
-systemctl status airflow-worker
-systemctl status postgresql
-systemctl status redis
+# Restart PostgreSQL service
+sudo systemctl restart postgresql
 
-# View PostgreSQL cluster status
-pg_lsclusters
+# Start PostgreSQL cluster
+# TODO
 ```
 
-## View logs
+To connect to the SQL database, see code [examples](examples).
 
-Service logs are available using the `journalctl` command:
+### PostgreSQL interactive terminal
+
+You can connect to the database with [psql](https://www.postgresql.org/docs/12/app-psql.html) as follows:
 
 ```bash
-sudo journalctl -u airflow-worker --since "$(date -I)"
-sudo journalctl -u airflow-webserver --since "$(date -I)"
-sudo journalctl -u airflow-scheduler --since "$(date -I) 12:00"
+psql --host=airbodsdev.shef.ac.uk --dbname=airbods --username=airbods
 ```
 
-PostgreSQL database service logs:
-
-```bash
-sudo systemctl status postgresql
-sudo ls -l /var/log/postgresql
-sudo tail /var/log/postgresql/postgresql-12-main.log
-```
+You may need to change the username to something else. You can enter the password manually or use a [pgpass](https://www.postgresql.org/docs/12/libpq-pgpass.html) file.
 
 ## Airflow CLI
 
@@ -137,26 +126,6 @@ sudo su - airflow
 # List DAGs
 /opt/airflow/bin/airflow dags list
 ```
-
-## Worker monitoring
-
-You can look at the workers and tasks using [Flower](https://flower.readthedocs.io/en/latest/), a celery monitoring tool. This can be accessed using an SSH tunnel for port 5555:
-
-```bash
-ssh -L 5555:127.0.0.1:5555 $USER@airbodsdev.shef.ac.uk
-```
-
- Then open http://localhost:5555 in a web browser on your computer.
-
-## Message broker management console
-
-SSH tunnel port 15672 on the remote machine 127.0.0.1:15672 using the `ssh` command or `putty`.
-
-```bash
-ssh -L 15672:127.0.0.1:15672 $USER@airbodsdev.shef.ac.uk
-```
-
-Then open http://localhost:15672 on your local machine.
 
 # Testing
 
@@ -277,6 +246,41 @@ The SQL DDL used to define and create this schema is contained in SQL files in t
 
 # Monitoring
 
+The system comprises several services which are managed using `systemd`.
+
+## View service status
+
+You can view the status of the services using the following commands:
+
+```bash
+systemctl status airflow-webserver
+systemctl status airflow-scheduler
+systemctl status airflow-worker
+systemctl status postgresql
+systemctl status redis
+
+# View PostgreSQL cluster status
+pg_lsclusters
+```
+
+## View logs
+
+Service logs are available using the `journalctl` command:
+
+```bash
+sudo journalctl -u airflow-worker --since "$(date -I)"
+sudo journalctl -u airflow-webserver --since "$(date -I)"
+sudo journalctl -u airflow-scheduler --since "$(date -I) 12:00"
+```
+
+PostgreSQL database service logs:
+
+```bash
+sudo systemctl status postgresql
+sudo ls -l /var/log/postgresql
+sudo tail /var/log/postgresql/postgresql-12-main.log
+```
+
 ## System resource utilisation
 
 Task summary
@@ -289,5 +293,35 @@ Memory usage in MB:
 
 ```bash
 free --mega
+```
+
+## Worker monitoring
+
+You can look at the workers and tasks using [Flower](https://flower.readthedocs.io/en/latest/), a celery monitoring tool. This can be accessed using an SSH tunnel for port 5555:
+
+```bash
+ssh -L 5555:127.0.0.1:5555 $USER@airbodsdev.shef.ac.uk
+```
+
+ Then open http://localhost:5555 in a web browser on your computer.
+
+## Message broker management console
+
+SSH tunnel port 15672 on the remote machine 127.0.0.1:15672 using the `ssh` command or `putty`.
+
+```bash
+ssh -L 15672:127.0.0.1:15672 $USER@airbodsdev.shef.ac.uk
+```
+
+Then open http://localhost:15672 on your local machine.
+
+# Security certificates
+
+Check that private key matches certificate:
+
+```bash
+openssl rsa -noout -modulus -in secrets/airbods_shef_ac_uk.key
+openssl req -noout -modulus -in secrets/airbods_shef_ac_uk.csr
+openssl x509 -noout -modulus -in secrets/airbods_shef_ac_uk.cer
 ```
 

@@ -43,14 +43,17 @@
     - name: Install certificate
       copy:
         src: airbods_shef_ac_uk.cer
-        dest: /etc/ssl/certs/airbods_shef_ac_uk.cer
+        dest: /var/lib/postgresql/12/main/server.crt
+        owner: postgres
+        group: postgres
     # postgresql.conf ssl_key_file
-    - name: Install certificate key
+    - name: Install private key
       copy:
         src: secrets/airbods_shef_ac_uk.key
-        dest: /etc/ssl/private/airbods_shef_ac_uk.key
-        group: ssl-cert
-        mode: 0640
+        dest: /var/lib/postgresql/12/main/server.key
+        owner: postgres
+        group: postgres
+        mode: 0600
     # postgresql.conf ssl_passphrase_command
     - name: Install SSL key password
       copy:
@@ -59,6 +62,10 @@
         owner: postgres
         group: postgres
         mode: 0600
+    - name: Start PostgreSQL service
+      service:
+        name: postgresql
+        state: started
     - name: Create Airbods database user
       become: true
       become_user: postgres
