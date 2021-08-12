@@ -228,7 +228,7 @@ The is an Airflow GUI available via the [webserver](https://airflow.apache.org/d
 To run these commands, you must log in as the user `airflow`:
 
 ```bash
-sudo su - airflow
+sudo su - airflow --shell /bin/bash
 ```
 
 ## Clear
@@ -274,3 +274,8 @@ The SQL DDL used to define and create this schema is contained in SQL files in t
   * `air_quality`, `co2` and other physical measurements
   * `co2_zone_min`, `humidity_area_mean`, `temperature_zone_max` and other similar columns contain the aggregate statistics for each metric, partitioned over the location and day. The aggregate functions are the minimum `min`, average `mean` and maximum `max` for that deployment. The location may be the zone and area where the sensor was deployed. The day is the calendar date in UTC (GMT).
 * `device_deployment` merges the tables `device` and `deployment` but contains one row per sensor for *latest* deployment. The columns are the same as those on the two source tables.
+
+# Monitoring
+
+## System resource utilisation
+
