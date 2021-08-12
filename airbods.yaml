@@ -248,6 +248,12 @@
       postgresql_db:
         name: airflow
         owner: airflow
+    - name: Start Airflow services
+      systemd:
+        name: "airflow-{{ item }}"
+        state: started
+        daemon_reload: true
+      loop: "{{ service }}"
     - name: Initialise Airflow database
       become: yes
       become_user: airflow
@@ -276,11 +282,11 @@
           - "--email"
           - "airbods@sheffield.ac.uk"
     - name: Install Airflow content
-      become: yes
-      become_user: airflow
       copy:
         src: "{{ item }}"
         dest: "{{ airflow_home }}"
+        owner: airflow
+        group: airflow
       loop:
         - airflow/dags
         - airflow/plugins
