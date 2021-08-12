@@ -49,7 +49,7 @@ The database settings are specified in the Ansible playbook and the configuratio
 
 # Installation
 
-Automated deployment is implemented using Ansible. See their docs: [Executing playbooks for troubleshooting](https://docs.ansible.com/ansible/latest/user_guide/playbooks_startnstep.html).
+Automated deployment is implemented using Ansible. See their docs: [Executing playbooks for troubleshooting](https://docs.ansible.com/ansible/latest/user_guide/playbooks_startnstep.html). Most of the service configuration files are in the `files` directory (Ansible will automatically search this directory for files to upload.)
 
 The private key must be installed and configured on the target machine so that the control node may connect using SSH. The `ida_rsa` file is that user's private key. The `authorized_keys` file is used to list the public keys that can automatically connect. These files would be stored in the directory `~/.ssh` for the user you use to connect. The same configuration is also required for the `root` user in the directory `/root/.ssh`.
 
@@ -86,9 +86,11 @@ ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass test.yaml
 
 # Usage
 
-The system comprises several services.
+The system comprises several services which are managed using `systemd`.
 
 ## View service status
+
+You can view the status of the services using the following commands:
 
 ```bash
 systemctl status airflow-webserver
@@ -96,20 +98,24 @@ systemctl status airflow-scheduler
 systemctl status airflow-worker
 systemctl status postgresql
 systemctl status redis
+
+# View PostgreSQL cluster status
+pg_lsclusters
 ```
 
 ## View logs
 
+Service logs are available using the `journalctl` command:
+
 ```bash
-# View systemd logs
 sudo journalctl -u airflow-worker --since "$(date -I)"
 sudo journalctl -u airflow-webserver --since "$(date -I)"
 sudo journalctl -u airflow-scheduler --since "$(date -I) 12:00"
+```
 
-# View PostgreSQL cluster status
-pg_lsclusters
+PostgreSQL database service logs:
 
-# View PostgreSQL logs
+```bash
 sudo systemctl status postgresql
 sudo ls -l /var/log/postgresql
 sudo tail /var/log/postgresql/postgresql-12-main.log
@@ -132,15 +138,15 @@ sudo su - airflow
 /opt/airflow/bin/airflow dags list
 ```
 
-## Airflow web interface
-
-The is an Airflow GUI available via the [webserver](https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html) service available at http://airbodsdev.shef.ac.uk.
-
 ## Worker monitoring
 
-You can look at the workers using [Flower](https://flower.readthedocs.io/en/latest/), a celery monitoring tool.
+You can look at the workers and tasks using [Flower](https://flower.readthedocs.io/en/latest/), a celery monitoring tool. This can be accessed using an SSH tunnel for port 5555:
 
-SSH tunnel to port 5555 to 127.0.0.1:5555 (this can be done using the command `ssh -L 5555 :127.0.0.1:5555 $USER@airbodsdev.shef.ac.uk`). Then open `http://localhost:5555/` in a web browser on your computer.
+```bash
+ssh -L 5555:127.0.0.1:5555 $USER@airbodsdev.shef.ac.uk
+```
+
+ Then open http://localhost:5555 in a web browser on your computer.
 
 ## Message broker management console
 
@@ -150,7 +156,7 @@ SSH tunnel port 15672 on the remote machine 127.0.0.1:15672 using the `ssh` comm
 ssh -L 15672:127.0.0.1:15672 $USER@airbodsdev.shef.ac.uk
 ```
 
-Then open http://localhost:15672/ on your local machine.
+Then open http://localhost:15672 on your local machine.
 
 # Testing
 
@@ -213,6 +219,10 @@ Role membership can also be [managed](https://www.postgresql.org/docs/13/role-me
 
 The data pipelines are managed using [Apache Airflow](https://airflow.apache.org/docs/apache-airflow/stable/index.html).
 
+## Airflow web interface
+
+The is an Airflow GUI available via the [webserver](https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html) service available at http://airbodsdev.shef.ac.uk.
+
 ## Airflow command line interface
 
 To run these commands, you must log in as the user `airflow`:
@@ -262,5 +272,5 @@ The SQL DDL used to define and create this schema is contained in SQL files in t
   * `time_utc` and `time_europe_london` is the time of each reading, displayed in each time zone
   * `city`, `site`, `area` etc. are columns from the `deployment` table describing the sensor location.
   * `air_quality`, `co2` and other physical measurements
-  * `co2_room_min`, `humidity_area_mean`, `temperature_room_max` and other similar columns contain the aggregate statistics for each metric, partitioned over the location and day. The aggregate functions are the minimum `min`, average `mean` and maximum `max` for that deployment.
+  * `co2_zone_min`, `humidity_area_mean`, `temperature_zone_max` and other similar columns contain the aggregate statistics for each metric, partitioned over the location and day. The aggregate functions are the minimum `min`, average `mean` and maximum `max` for that deployment. The location may be the zone and area where the sensor was deployed. The day is the calendar date in UTC (GMT).
 * `device_deployment` merges the tables `device` and `deployment` but contains one row per sensor for *latest* deployment. The columns are the same as those on the two source tables.
