@@ -22,7 +22,7 @@ SELECT clean.device_id
      , clean.co2 - COALESCE(deployment.co2_baseline, 0)           AS co2_excess
      , clean.humidity
      , clean.temperature
-     -- Area averages
+     -- Area daily averages
      , MIN(clean.co2) OVER (PARTITION BY deployment.area, clean.time_::DATE)         AS co2_area_min
      , MIN(clean.humidity) OVER (PARTITION BY deployment.area, clean.time_::DATE)    AS humidity_area_min
      , MIN(clean.temperature) OVER (PARTITION BY deployment.area, clean.time_::DATE) AS temperature_area_min
@@ -32,7 +32,7 @@ SELECT clean.device_id
      , MAX(clean.co2) OVER (PARTITION BY deployment.area, clean.time_::DATE)         AS co2_area_max
      , MAX(clean.humidity) OVER (PARTITION BY deployment.area, clean.time_::DATE)    AS humidity_area_max
      , MAX(clean.temperature) OVER (PARTITION BY deployment.area, clean.time_::DATE) AS temperature_area_max
-     -- Zone averages
+     -- Zone daily averages
      , MIN(clean.co2) OVER (PARTITION BY deployment.zone, clean.time_::DATE)         AS co2_zone_min
      , MIN(clean.humidity) OVER (PARTITION BY deployment.zone, clean.time_::DATE)    AS humidity_zone_min
      , MIN(clean.temperature) OVER (PARTITION BY deployment.zone, clean.time_::DATE) AS temperature_zone_min
@@ -42,8 +42,14 @@ SELECT clean.device_id
      , MAX(clean.co2) OVER (PARTITION BY deployment.zone, clean.time_::DATE)         AS co2_zone_max
      , MAX(clean.humidity) OVER (PARTITION BY deployment.zone, clean.time_::DATE)    AS humidity_zone_max
      , MAX(clean.temperature) OVER (PARTITION BY deployment.zone, clean.time_::DATE) AS temperature_zone_max
+
+     -- CO2 rolling average over last 10 minutes per zone
+     ,AVG(clean.co2) OVER (PARTITION BY deployment.zone ROWS BETWEEN 5 PRECEDING AND CURRENT ROW) AS co2_mean_rolling_5_rows
+
 FROM airbods.public.clean
          INNER JOIN airbods.public.device ON clean.device_id = device.device_id
          LEFT JOIN airbods.public.deployment
                    ON device.serial_number = deployment.serial_number
-                       AND clean.time_ BETWEEN deployment.start_time AND COALESCE(deployment.end_time, NOW());
+                       AND clean.time_ BETWEEN deployment.start_time AND COALESCE(deployment.end_time, NOW())
+ORDER BY clean.time_
+;

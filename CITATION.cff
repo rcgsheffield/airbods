@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Heffer"
+  given-names: "Joe Salvador Thornhill"
+  orcid: "https://orcid.org/0000-0001-8733-1117"
+title: "Airbods"
+version: 0.0.1
+date-released: 2021-08-12
+url: "https://github.com/Joe-Heffer-Shef/flairbods"

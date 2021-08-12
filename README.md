@@ -47,6 +47,43 @@ The RDMS service contains three databases:
 
 The database settings are specified in the Ansible playbook and the configuration files `postgresql.conf` and `pg_hba.conf` as discussed in the [PostgreSQL  12 documentation](https://www.postgresql.org/docs/12/index.html).
 
+# Installation
+
+Automated deployment is implemented using Ansible. See their docs: [Executing playbooks for troubleshooting](https://docs.ansible.com/ansible/latest/user_guide/playbooks_startnstep.html).
+
+The private key must be installed and configured on the target machine so that the control node may connect using SSH. The `ida_rsa` file is that user's private key. The `authorized_keys` file is used to list the public keys that can automatically connect. These files would be stored in the directory `~/.ssh` for the user you use to connect. The same configuration is also required for the `root` user in the directory `/root/.ssh`.
+
+Check Ansible is working:
+
+```bash
+# View Ansible package version
+ansible --version
+
+# View inventory
+ansible --inventory hosts.yaml --list-hosts all
+
+# Ping nodes
+ansible --inventory hosts.yaml --user $USER -m ping all
+
+# Run a custom command
+ansible --inventory hosts.yaml --user $USER -a "echo OK" all
+
+# Check a playbook
+ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass airbods.yaml --check
+```
+
+Install services:
+
+```bash
+ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass airbods.yaml
+```
+
+Run automated tests:
+
+```bash
+ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass test.yaml
+```
+
 # Usage
 
 The system comprises several services.
@@ -136,43 +173,6 @@ Run unit tests:
 
 ```bash
 python -m unittest --failfast
-```
-
-# Deployment
-
-Ansible [Executing playbooks for troubleshooting](https://docs.ansible.com/ansible/latest/user_guide/playbooks_startnstep.html)
-
-The private key must be installed and configured on the target machine so that the control node may connect using SSH. The `ida_rsa` file is that user's private key. The `authorized_keys` file is used to list the public keys that can automatically connect. These files would be stored in the directory `~/.ssh` for the user you use to connect. The same configuration is also required for the `root` user in the directory `/root/.ssh`.
-
-Check Ansible is working:
-
-```bash
-# View Ansible package version
-ansible --version
-
-# View inventory
-ansible --inventory hosts.yaml --list-hosts all
-
-# Ping nodes
-ansible --inventory hosts.yaml --user $USER -m ping all
-
-# Run a custom command
-ansible --inventory hosts.yaml --user $USER -a "echo OK" all
-
-# Check a playbook
-ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass airbods.yaml --check
-```
-
-Install services:
-
-```bash
-ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass airbods.yaml
-```
-
-Run automated tests:
-
-```bash
-ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass test.yaml
 ```
 
 # Data access
