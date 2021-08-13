@@ -43,3 +43,7 @@ sql = sprintf('%s\n', [
 ]);
 readings = fetch(conn, sql);
 %disp(readings);
+
+% Write to CSV
+filename = sprintf('airbods_%s.csv', datestr(now, 'yyyyddmmTHHMMSS.FFFZ'));
+writetable(readings, filename)

@@ -133,3 +133,4 @@ logs/
 secrets/
 .ssh
 .ansible
+.Rhistory

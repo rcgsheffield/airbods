@@ -44,3 +44,10 @@ df = pd.read_sql(sql, engine)
 df.info()
 
 print(df.head())
+
+# Export to CSV
+filename = "airbods_{}.csv".format(pd.Timestamp.now().isoformat())
+df.to_csv(filename)
+
+# Export to Excel
+#df.to_excel('airbods.xlsx')

@@ -54,3 +54,7 @@ print(head(data))
 
 # Close connection
 #dbDisconnect(con) 
+
+# Export to CSV
+filename = sprintf("airbods_%s.csv", format(Sys.time(), "%Y%m%dT%H%M%S%z"))
+write.csv(data, filename)
