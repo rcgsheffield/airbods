@@ -4,11 +4,31 @@
 # Plays
 - name: Upgrade packages
   become: yes
-  apt:
-    update_cache: yes
-    upgrade: full
+  tasks:
+    - name: Upgrade packages
+      apt:
+        update_cache: yes
+        upgrade: full
 
-# https://www.postgresql.org/docs/current/maintenance.html
+# https://www.postgresql.org/docs/12/maintenance.html
 - name: PostgreSQL routine maintenance
-
+  remote_user: root
+  tasks:
+    # https://www.postgresql.org/docs/12/backup.html
+    # https://stribny.name/blog/ansible-postgresql-backups/
+    - name: SQL Backup
+      become: yes
+      become_user: postgres
+      postgresql_db:
+        state: dump
+        name: airbods
+        target: /home/postgres/airbods.sql.gz
+    # https://www.postgresql.org/docs/12/routine-vacuuming.html
+    - name: Vacuum
+      become: yes
+      become_user: postgres
+      postgresql_query:
+        db: airbods
+        query: VACUUM
+        autocommit: yes
 ...

@@ -49,7 +49,7 @@ The database settings are specified in the Ansible playbook and the configuratio
 
 # Installation
 
-Automated deployment is implemented using Ansible. See their docs: [Executing playbooks for troubleshooting](https://docs.ansible.com/ansible/latest/user_guide/playbooks_startnstep.html). Most of the service configuration files are in the `files` directory (Ansible will automatically search this directory for files to upload.)
+Automated deployment is implemented using Ansible. See their docs: [Executing playbooks for troubleshooting](https://docs.ansible.com/ansible/latest/user_guide/playbooks_startnstep.html). Most of the service configuration files are in the `files` directory (Ansible will automatically search this directory for files to upload.) Variables are defined in the  `group_vars/all` YAML file.
 
 The private key must be installed and configured on the target machine so that the control node may connect using SSH. The `ida_rsa` file is that user's private key. The `authorized_keys` file is used to list the public keys that can automatically connect. These files would be stored in the directory `~/.ssh` for the user you use to connect. The same configuration is also required for the `root` user in the directory `/root/.ssh`.
 
@@ -109,6 +109,17 @@ psql --host=airbodsdev.shef.ac.uk --dbname=airbods --username=airbods
 ```
 
 You may need to change the username to something else. You can enter the password manually or use a [pgpass](https://www.postgresql.org/docs/12/libpq-pgpass.html) file.
+
+### Backup
+
+See PostgreSQL docs [Chapter 25. Backup and Restore](https://www.postgresql.org/docs/12/backup.html).
+
+```bash
+# Log in with database service account
+sudo su - postgres --shell /bin/bash
+
+
+```
 
 ## Airflow CLI
 
