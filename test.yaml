@@ -11,4 +11,13 @@
         - datacake_devices
         - datacake
         - deployments
+
+    # https://airflow.apache.org/docs/apache-airflow/stable/best-practices.html#dag-loader-test
+    - name: Load DAGs
+      become: yes
+      become_user: airflow
+      shell:
+        cmd: "{{ airflow_bin_path }}/python {{ item }}"
+      with_fileglob:
+        - "{{ airflow_home }}/dags/*.py"
 ...
