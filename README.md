@@ -118,7 +118,7 @@ See PostgreSQL docs [Chapter 25. Backup and Restore](https://www.postgresql.org/
 # Log in with database service account
 sudo su - postgres --shell /bin/bash
 
-
+pg_dump -h airbods.shef.ac.uk airbods > airbods.sql
 ```
 
 ## Airflow CLI
@@ -267,10 +267,10 @@ You can view the status of the services using the following commands:
 systemctl status airflow-webserver
 systemctl status airflow-scheduler
 systemctl status airflow-worker
-systemctl status postgresql
 systemctl status redis
 
 # View PostgreSQL cluster status
+systemctl status postgresql
 pg_lsclusters
 ```
 

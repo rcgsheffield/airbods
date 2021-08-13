@@ -219,9 +219,23 @@
       file:
         path: "{{ secrets_dir }}"
         state: directory
-        mode: '0500'
+        mode: 0500
         owner: airflow
         group: airflow
+    - name: Install webserver private key
+      copy:
+        src: secrets/webserver_key.pem
+        dest: /home/airflow/secrets/webserver_key.pem
+        owner: airflow
+        group: airflow
+        mode: 0400
+    - name: Install webserver certificate
+      copy:
+        src: secrets/webserver.pem
+        dest: /home/airflow/secrets/webserver.pem
+        owner: airflow
+        group: airflow
+        mode: 0644
     - name: Install connection string
       copy:
         src: secrets/sql_alchemy_conn_localhost.txt
