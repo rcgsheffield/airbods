@@ -1,0 +1,1 @@
+Ansible docs - How to build your inventory - [Organizing host and group variables](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#organizing-host-and-group-variables)
