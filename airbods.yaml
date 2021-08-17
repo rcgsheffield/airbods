@@ -10,8 +10,7 @@
 
 - name: Install PostgreSQL database
   hosts: all
-  # This is required because we can't sudo as postgres user
-  remote_user: root
+  become: yes
   pre_tasks:
     - name: Install postgresql package
       apt:
@@ -67,7 +66,6 @@
         name: postgresql
         state: started
     - name: Create Airbods database user
-      become: true
       become_user: postgres
       postgresql_user:
         user: airbods
@@ -75,13 +73,11 @@
         #login_user: postgres
         #login_password: "{{ lookup('file', 'secrets/postgres.txt') }}"
     - name: Create Airbods database
-      become: true
       become_user: postgres
       postgresql_db:
         name: airbods
         owner: airbods
     - name: Create Airbods database structure
-      become: true
       become_user: airbods
       postgresql_query:
         db: airbods
@@ -91,14 +87,12 @@
       with_fileglob:
         - "database/*.sql"
     - name: Create researcher database role
-      become: true
       become_user: postgres
       postgresql_user:
         db: airbods
         user: researcher
         role_attr_flags: NOLOGIN
     - name: Set researcher permissions
-      become: true
       become_user: postgres
       postgresql_privs:
         role: researcher
@@ -168,7 +162,7 @@
 # https://airflow.apache.org/docs/apache-airflow/stable/installation.html
 - name: Install Apache Airflow
   hosts: all
-  remote_user: root
+  become: yes
   pre_tasks:
     - name: Create airflow system user
       user:
@@ -258,13 +252,11 @@
         owner: airflow
         mode: '0400'
     - name: Create airflow database user
-      become: true
       become_user: postgres
       postgresql_user:
         user: airflow
         password: "{{ lookup('file', 'secrets/airflow.txt') }}"
     - name: Create airflow database
-      become: true
       become_user: postgres
       postgresql_db:
         name: airflow
@@ -276,7 +268,6 @@
         daemon_reload: true
       loop: "{{ service }}"
     - name: Initialise Airflow database
-      become: yes
       become_user: airflow
       # "initdb is also idempotent, so this can be run as often as you
       # choose to, without needing to worry about the database changing."
@@ -314,7 +305,6 @@
         - airflow/tests
         - airflow/variables.json
     - name: Import variables
-      become: yes
       become_user: airflow
       shell: "{{ airflow_bin_path }}/airflow variables import {{ airflow_home }}/variables.json"
       tags:
