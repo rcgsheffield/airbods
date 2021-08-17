@@ -51,6 +51,8 @@ The database settings are specified in the Ansible playbook and the configuratio
 
 Automated deployment is implemented using Ansible. See their docs: [Executing playbooks for troubleshooting](https://docs.ansible.com/ansible/latest/user_guide/playbooks_startnstep.html). Most of the service configuration files are in the `files` directory (Ansible will automatically search this directory for files to upload.) Variables are defined in the  `group_vars/all` YAML file.
 
+It's assumed that you log into the remote system as a user (with username `$USER`) that is a member of the system administrator's group `airbodsadmins`. Contact the ITS Unix team with queries about this.
+
 The private key must be installed and configured on the target machine so that the control node may connect using SSH. The `ida_rsa` file is that user's private key. The `authorized_keys` file is used to list the public keys that can automatically connect. These files would be stored in the directory `~/.ssh` for the user you use to connect. The same configuration is also required for the `root` user in the directory `/root/.ssh`.
 
 Check Ansible is working:
