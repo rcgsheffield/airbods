@@ -335,6 +335,6 @@ Check that private key matches certificate:
 ```bash
 openssl rsa -noout -modulus -in secrets/airbods_shef_ac_uk.key
 openssl req -noout -modulus -in secrets/airbods_shef_ac_uk.csr
-openssl x509 -noout -modulus -in secrets/airbods_shef_ac_uk.cer
+openssl x509 -noout -modulus -in files/airbods_shef_ac_uk_cert.cer
 ```
 
