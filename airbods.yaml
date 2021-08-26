@@ -41,7 +41,7 @@
     # postgresql.conf ssl_cert_file
     - name: Install certificate
       copy:
-        src: airbods_shef_ac_uk.cer
+        src: airbods_shef_ac_uk_cert.cer
         dest: /var/lib/postgresql/12/main/server.crt
         owner: postgres
         group: postgres
