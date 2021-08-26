@@ -214,6 +214,8 @@
         mode: 0500
         owner: airflow
         group: airflow
+    # Airflow webserver encryption
+    # https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html#ssl
     - name: Install webserver private key
       copy:
         src: secrets/webserver_key.pem
@@ -259,6 +261,14 @@
       postgresql_db:
         name: airflow
         owner: airflow
+    # https://man7.org/linux/man-pages/man7/capabilities.7.html
+    # https://superuser.com/a/892391
+    - name: Allow Airflow to listen on privileged ports
+      shell:
+        # Set file capabilities "Effective, Inheritable and Permitted" for the
+        # Airflow executable.
+        # https://linux.die.net/man/8/setcap
+        command: "setcap CAP_NET_BIND_SERVICE=+eip {{ airflow_bin_path }}/airflow"
     - name: Start Airflow services
       systemd:
         name: "airflow-{{ item }}"
