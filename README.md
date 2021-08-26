@@ -49,9 +49,30 @@ The database settings are specified in the Ansible playbook and the configuratio
 
 # Installation
 
+## Ansible
+
 Automated deployment is implemented using Ansible. See their docs: [Executing playbooks for troubleshooting](https://docs.ansible.com/ansible/latest/user_guide/playbooks_startnstep.html). Most of the service configuration files are in the `files` directory (Ansible will automatically search this directory for files to upload.) Variables are defined in the  `group_vars/all` YAML file.
 
+You may need to [install Ansible in a Python virtual environment](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#id18). To use the tool you'll need to activate the virtual environment with a command similar to the one below, assuming the environment was created in the directory `~/ansible`:
+
+```bash
+source ~/ansible/bin/activate
+```
+
+
+
+## Deployment
+
+The deployment script installs the necessary software subsystems on a remote machine. The script should be idempotent so it can be run repeatedly without causing problems.
+
 It's assumed that you log into the remote system as a user (with username `$USER`) that is a member of the system administrator's group `airbodsadmins`. Contact the ITS Unix team with queries about this.
+
+You'll also need to be able to run executables as other users. To test this, try to run the following commands (which will only work after the relevant users have been created.)
+
+```bash
+sudo -u postgres id
+sudo -u airflow id
+```
 
 The private key must be installed and configured on the target machine so that the control node may connect using SSH. The `ida_rsa` file is that user's private key. The `authorized_keys` file is used to list the public keys that can automatically connect. These files would be stored in the directory `~/.ssh` for the user you use to connect. The same configuration is also required for the `root` user in the directory `/root/.ssh`.
 
@@ -95,9 +116,6 @@ The database service may be controlled using `systemd`:
 ```bash
 # Restart PostgreSQL service
 sudo systemctl restart postgresql
-
-# Start PostgreSQL cluster
-# TODO
 ```
 
 To connect to the SQL database, see code [examples](examples).
@@ -111,6 +129,12 @@ psql --host=airbodsdev.shef.ac.uk --dbname=airbods --username=airbods
 ```
 
 You may need to change the username to something else. You can enter the password manually or use a [pgpass](https://www.postgresql.org/docs/12/libpq-pgpass.html) file.
+
+You can run a command by using the shell or as follows:
+
+```bash
+psql --host=airbodsdev.shef.ac.uk --dbname=airbods --username=airbods --command "SELECT now();"
+```
 
 ### Backup
 
@@ -290,6 +314,7 @@ PostgreSQL database service logs:
 
 ```bash
 sudo systemctl status postgresql
+# List available log files (they're rotated regularly)
 sudo ls -l /var/log/postgresql
 sudo tail /var/log/postgresql/postgresql-12-main.log
 ```
