@@ -70,8 +70,6 @@
       postgresql_user:
         user: airbods
         password: "{{ lookup('file', 'secrets/database.txt') }}"
-        #login_user: postgres
-        #login_password: "{{ lookup('file', 'secrets/postgres.txt') }}"
     - name: Create Airbods database
       become_user: postgres
       postgresql_db:
@@ -275,7 +273,7 @@
       shell: "{{ airflow_bin_path }}/airflow db init"
     - name: Create Airflow admin user
       # Don't show password
-      #no_log: true
+      no_log: true
       command:
         argv:
           - "{{ airflow_bin_path }}/airflow"

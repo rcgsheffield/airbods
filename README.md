@@ -227,7 +227,15 @@ The data pipelines are managed using [Apache Airflow](https://airflow.apache.org
 
 ## Airflow web interface
 
-The is an Airflow GUI available via the [webserver](https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html) service available at http://airbodsdev.shef.ac.uk.
+The is an Airflow GUI available via the [webserver](https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html) service available at https://airbodsdev.shef.ac.uk.
+
+To test that this is available:
+
+```bash
+curl -I https://airbodsdev.shef.ac.uk
+```
+
+
 
 ## Airflow command line interface
 

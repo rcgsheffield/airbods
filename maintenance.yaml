@@ -31,4 +31,11 @@
         db: airbods
         query: VACUUM
         autocommit: yes
+
+- name: Delete old log files
+  become: yes
+  tasks:
+    - name: Remove old logs
+      shell:
+        command: "journalctl --vacuum-size=1G"
 ...
