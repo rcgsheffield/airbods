@@ -61,6 +61,18 @@ source ~/ansible/bin/activate
 
 
 
+## Key generation
+
+### Airflow webserver
+
+Generate key and certificate:
+
+```
+openssl req -nodes -x509 -newkey rsa:4096 -keyout secrets/webserver_key.pem -out secrets/webserver.pem -days 365
+```
+
+`-nodes` means "No DES" or an unencrypted private key which has no password.
+
 ## Deployment
 
 The deployment script installs the necessary software subsystems on a remote machine. The script should be idempotent so it can be run repeatedly without causing problems.
@@ -234,8 +246,6 @@ To test that this is available:
 ```bash
 curl -I https://airbodsdev.shef.ac.uk
 ```
-
-
 
 ## Airflow command line interface
 

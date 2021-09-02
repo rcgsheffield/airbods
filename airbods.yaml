@@ -266,9 +266,10 @@
     - name: Allow Airflow to listen on privileged ports
       shell:
         # Set file capabilities "Effective, Inheritable and Permitted" for the
-        # Airflow executable.
+        # Python interpreter used to run Airflow.
         # https://linux.die.net/man/8/setcap
-        command: "setcap CAP_NET_BIND_SERVICE=+eip {{ airflow_bin_path }}/airflow"
+        # You can check this using `getcap /usr/bin/python3.8`
+        cmd: "setcap cap_net_bind_service=+eip /usr/bin/python3.8"
     - name: Start Airflow services
       systemd:
         name: "airflow-{{ item }}"
