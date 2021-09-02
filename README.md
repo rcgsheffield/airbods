@@ -63,6 +63,8 @@ source ~/ansible/bin/activate
 
 ## Key generation
 
+Security keys, certificate requests and certificates may be generated using `openssl`. Certificate-authority-signed certificates were retrieved via ITS Helpdesk.
+
 ### Airflow webserver
 
 Generate key and certificate:
@@ -177,6 +179,8 @@ sudo su - airflow
 ```
 
 # Testing
+
+## Airflow
 
 See [Testing a DAG](https://airflow.apache.org/docs/apache-airflow/stable/best-practices.html#testing-a-dag).
 
