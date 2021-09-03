@@ -216,7 +216,7 @@ pg_dump -h airbods.shef.ac.uk airbods > airbods.sql
 You can use the Airflow [Using the Command Line Interface](http://airflow.apache.org/docs/apache-airflow/stable/usage-cli.html#) to view, control and administer the workflow orchestrator. You should run this tool as the service user `airflow` or as `root`.
 
 ```bash
-# Log in as system user
+# Log in as system user (or use sudo -u airflow <command>)
 sudo su - airflow
 
 /opt/airflow/bin/airflow --help

@@ -316,6 +316,7 @@
     - name: Create Airflow admin user
       # Don't show password
       no_log: true
+      become_user: airflow
       command:
         argv:
           - "{{ airflow_bin_path }}/airflow"
