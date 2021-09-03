@@ -40,6 +40,8 @@
       copy:
         src: postgresql.conf
         dest: /etc/postgresql/12/main/postgresql.conf
+      notify:
+        - Restart PostgreSQL
     # postgresql.conf ssl_cert_file
     - name: Install certificate
       copy:
@@ -109,7 +111,7 @@
         type: table
         objs: ALL_IN_SCHEMA
   handlers:
-    - name: Restart PostgreSQL service
+    - name: Restart PostgreSQL
       service:
         name: postgresql
         state: restarted
@@ -142,6 +144,8 @@
         path: /etc/rabbitmq/rabbitmq-env.conf
         regexp: '^HOSTNAME='
         line: HOSTNAME=localhost
+      notify:
+        - Restart RabbitMQ
     - name: Start RabbitMQ service
       systemd:
         name: rabbitmq-server
@@ -175,7 +179,7 @@
         user: guest
         state: absent
   handlers:
-    - name: Restart RabbitMQ service
+    - name: Restart RabbitMQ
       systemd:
         name: rabbitmq-server
         state: restarted
@@ -345,6 +349,8 @@
         - airflow/plugins
         - airflow/tests
         - airflow/variables.json
+      notify:
+        - Restart Airflow services
     - name: Import variables
       become_user: airflow
       shell: "{{ airflow_bin_path }}/airflow variables import {{ airflow_home }}/variables.json"

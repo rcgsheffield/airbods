@@ -366,10 +366,14 @@ systemctl status airflow-webserver
 systemctl status airflow-scheduler
 systemctl status airflow-worker
 systemctl status redis
+systemctl status rabbitmq-server
 
 # View PostgreSQL cluster status
 systemctl status postgresql
 pg_lsclusters
+
+# Airflow
+sudo -u airflow /opt/airflow/bin/airflow info
 ```
 
 ## View logs
