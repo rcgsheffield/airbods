@@ -121,6 +121,17 @@ Run automated tests:
 ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass test.yaml
 ```
 
+### Production
+
+To deploy the system to a production instance, the following changes are required. There is more information about managing separate environments using Ansible on this Digital Ocean tutorial: "[How to Manage Multistage Environments with Ansible](https://www.digitalocean.com/community/tutorials/how-to-manage-multistage-environments-with-ansible#ansible-recommended-strategy-using-groups-and-multiple-inventories)".
+
+You need to use a different inventory file which will point the deployment script to a different machine using the `--inventory` argument of the `ansible-playbook` command.
+
+```bash
+# Run the deployment script in the production environment
+ansible-playbook --inventory hosts-prod.yaml --user $USER --ask-become-pass airbods.yaml
+```
+
 # Usage
 
 ## SQL database
@@ -139,7 +150,7 @@ To connect to the SQL database, see code [examples](examples).
 You can connect to the database with [psql](https://www.postgresql.org/docs/12/app-psql.html) as follows:
 
 ```bash
-psql --host=airbodsdev.shef.ac.uk --dbname=airbods --username=airbods
+psql --host=airbods.shef.ac.uk --dbname=airbods --username=airbods
 ```
 
 You may need to change the username to something else. You can enter the password manually or use a [pgpass](https://www.postgresql.org/docs/12/libpq-pgpass.html) file.
@@ -147,7 +158,7 @@ You may need to change the username to something else. You can enter the passwor
 You can run a command by using the shell or as follows:
 
 ```bash
-psql --host=airbodsdev.shef.ac.uk --dbname=airbods --username=airbods --command "SELECT now();"
+psql --host=airbods.shef.ac.uk --dbname=airbods --username=airbods --command "SELECT now();"
 ```
 
 ### Backup
@@ -243,12 +254,12 @@ The data pipelines are managed using [Apache Airflow](https://airflow.apache.org
 
 ## Airflow web interface
 
-The is an Airflow GUI available via the [webserver](https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html) service available at https://airbodsdev.shef.ac.uk.
+The is an Airflow GUI available via the [webserver](https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html) service available at https://airbods.shef.ac.uk.
 
 To test that this is available:
 
 ```bash
-curl -I https://airbodsdev.shef.ac.uk
+curl -I https://airbods.shef.ac.uk
 ```
 
 ## Airflow command line interface
@@ -360,7 +371,7 @@ free --mega
 You can look at the workers and tasks using [Flower](https://flower.readthedocs.io/en/latest/), a celery monitoring tool. This can be accessed using an SSH tunnel for port 5555:
 
 ```bash
-ssh -L 5555:127.0.0.1:5555 $USER@airbodsdev.shef.ac.uk
+ssh -L 5555:127.0.0.1:5555 $USER@airbods.shef.ac.uk
 ```
 
  Then open http://localhost:5555 in a web browser on your computer.
@@ -370,7 +381,7 @@ ssh -L 5555:127.0.0.1:5555 $USER@airbodsdev.shef.ac.uk
 SSH tunnel port 15672 on the remote machine 127.0.0.1:15672 using the `ssh` command or `putty`.
 
 ```bash
-ssh -L 15672:127.0.0.1:15672 $USER@airbodsdev.shef.ac.uk
+ssh -L 15672:127.0.0.1:15672 $USER@airbods.shef.ac.uk
 ```
 
 Then open http://localhost:15672 on your local machine.

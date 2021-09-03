@@ -1,4 +1,7 @@
 ---
+# Variables for all hosts in all groups
+
+# Variables related to Apache Airflow
 service:
   - worker
   - scheduler
@@ -6,6 +9,7 @@ service:
   - flower
 
 airflow_bin_path: /opt/airflow/bin
-secrets_dir: /home/airflow/secrets
 airflow_home: /home/airflow/airflow
+
+secrets_dir: /home/airflow/secrets
 ...

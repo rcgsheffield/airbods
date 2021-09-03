@@ -3,14 +3,4 @@
 all:
   hosts:
     airbodsdev.shef.ac.uk:
-    #airbods.shef.ac.uk:
-
-  # Groups
-  children:
-    dev:
-      airbodsdev.shef.ac.uk:
-    #prod:
-      #airbods.shef.ac.uk:
-    workers:
-      airbodsdev.shef.ac.uk:
 ...

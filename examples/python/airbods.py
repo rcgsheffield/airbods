@@ -10,8 +10,7 @@ import pandas as pd
 import sqlalchemy.engine.url
 
 USERNAME = 'airbods'
-HOST = 'airbodsdev.shef.ac.uk'
-# HOST = 'airbods.shef.ac.uk'
+HOST = 'airbods.shef.ac.uk'
 DATABASE = 'airbods'
 
 url = sqlalchemy.engine.url.URL(
