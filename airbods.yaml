@@ -14,7 +14,9 @@
   pre_tasks:
     - name: Install postgresql package
       apt:
-        name: postgresql-12
+        name:
+          - postgresql-12
+          - python3-pip
     - name: Create Airbods system user
       user:
         name: airbods
@@ -53,6 +55,13 @@
         owner: postgres
         group: postgres
         mode: 0600
+    - name: Create postgres home directory
+      file:
+        path: /home/postgres
+        state: directory
+        owner: postgres
+        group: postgres
+        mode: 0755
     # postgresql.conf ssl_passphrase_command
     - name: Install SSL key password
       copy:
@@ -127,6 +136,12 @@
     - name: Install RabbitMQ package
       apt:
         name: rabbitmq-server
+    # https://stackoverflow.com/a/45475646
+    - name: RabbitMQ set HOSTNAME
+      lineinfile:
+        path: /etc/rabbitmq/rabbitmq-env.conf
+        regexp: '^HOSTNAME='
+        line: HOSTNAME=localhost
     - name: Start RabbitMQ service
       systemd:
         name: rabbitmq-server
@@ -135,13 +150,20 @@
       shell: rabbitmq-plugins enable rabbitmq_management
     - name: Create RabbitMQ vhost
       rabbitmq_vhost:
+        # This is required to fix the error "unable to connect to epmd (port
+        # 4369) on airbods: timeout (timed out)" that occurs when the default
+        # value is used.
+        node: rabbit@localhost
         name: airflow
     # This task seems to be problematic with older versions of Ansible
     # https://github.com/ansible-collections/community.rabbitmq/issues/52
     - name: Create RabbitMQ user
       rabbitmq_user:
+        # This is required to avoid the error "Could not determine the
+        # version of the RabbitMQ server."
+        node: rabbit@localhost
         user: airflow
-        password: fWfkEq4C
+        password: "{{ lookup('file', 'secrets/rabbitmq.txt') }}"
         permissions:
           - vhost: airflow
             read_priv: .*
@@ -149,6 +171,7 @@
             configure_priv: .*
     - name: Delete RabbitMQ guest user
       rabbitmq_user:
+        node: rabbit@localhost
         user: guest
         state: absent
   handlers:

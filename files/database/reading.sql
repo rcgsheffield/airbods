@@ -1,5 +1,5 @@
 /* Useful views */
-DROP VIEW airbods.public.reading;
+DROP VIEW IF EXISTS airbods.public.reading;
 CREATE OR REPLACE VIEW airbods.public.reading AS
 SELECT
      -- Dimensions

@@ -49,6 +49,8 @@ The database settings are specified in the Ansible playbook and the configuratio
 
 # Installation
 
+The system comprises multiple subsystems as described above that are installed using an automated deployment tool to facilitate continuous integration/continuous deployment (CICD).
+
 ## Ansible
 
 Automated deployment is implemented using Ansible. See their docs: [Executing playbooks for troubleshooting](https://docs.ansible.com/ansible/latest/user_guide/playbooks_startnstep.html). Most of the service configuration files are in the `files` directory (Ansible will automatically search this directory for files to upload.) Variables are defined in the  `group_vars/all` YAML file.
@@ -63,7 +65,7 @@ source ~/ansible/bin/activate
 
 ## Key generation
 
-Security keys, certificate requests and certificates may be generated using `openssl`. Certificate-authority-signed certificates were retrieved via ITS Helpdesk.
+Security keys, certificate requests and certificates may be generated using `openssl`. Certificate-authority-signed certificates were retrieved via ITS Helpdesk. This is particularly important for the SQL database because this service will be exposed to the risks associated with access via the public internet.
 
 ### Airflow webserver
 
@@ -79,6 +81,20 @@ openssl req -nodes -x509 -newkey rsa:4096 -keyout secrets/webserver_key.pem -out
 
 The deployment script installs the necessary software subsystems on a remote machine. The script should be idempotent so it can be run repeatedly without causing problems.
 
+### Secure shell access
+
+The private key must be installed and configured on the target machine so that the control node may connect using secure shell (SSH). The `ida_rsa` file is that user's private key. The `authorized_keys` file is used to list the public keys that can automatically connect. These files would be stored in the directory `~/.ssh` for the user you use to connect.
+
+```bash
+# Assuming the private key file is present, generate a public key
+ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
+
+# Allow that private key to automatically log in by appending public key to authorized_keys list
+cat .ssh/id_rsa.pub >> .ssh/authorized_keys
+```
+
+### Superuser access
+
 It's assumed that you log into the remote system as a user (with username `$USER`) that is a member of the system administrator's group `airbodsadmins`. Contact the ITS Unix team with queries about this.
 
 You'll also need to be able to run executables as other users. To test this, try to run the following commands (which will only work after the relevant users have been created.)
@@ -88,7 +104,13 @@ sudo -u postgres id
 sudo -u airflow id
 ```
 
-The private key must be installed and configured on the target machine so that the control node may connect using SSH. The `ida_rsa` file is that user's private key. The `authorized_keys` file is used to list the public keys that can automatically connect. These files would be stored in the directory `~/.ssh` for the user you use to connect. The same configuration is also required for the `root` user in the directory `/root/.ssh`.
+### Running Ansible
+
+The variable `$USER` is used to specify which username to use to connect to the remote host.
+
+```bash
+USER=<sa_username>
+```
 
 Check Ansible is working:
 
@@ -104,6 +126,13 @@ ansible --inventory hosts.yaml --user $USER -m ping all
 
 # Run a custom command
 ansible --inventory hosts.yaml --user $USER -a "echo OK" all
+```
+
+To run the deployment script, we need to use the deployment script which is defined as an Ansible "playbook" using the `ansible-playbook` command (see [ansible-playbook CLI docs](https://docs.ansible.com/ansible/latest/cli/ansible-playbook.html)).
+
+```bash
+# Check that the Ansible Playbook command is working
+ansible-playbook --version
 
 # Check a playbook
 ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass airbods.yaml --check
@@ -132,7 +161,17 @@ You need to use a different inventory file which will point the deployment scrip
 ansible-playbook --inventory hosts-prod.yaml --user $USER --ask-become-pass airbods.yaml
 ```
 
+### Troubleshooting
+
+If problems occur, check the logs and try the following steps:
+
+* Reboot the remote system manually
+* Re-run the script
+* Use Ansible's verbose mode and other [debugging features](https://docs.ansible.com/ansible/latest/user_guide/playbooks_debugger.html)
+
 # Usage
+
+There are several ways to interact with and control each part of the system.
 
 ## SQL database
 
@@ -388,11 +427,18 @@ Then open http://localhost:15672 on your local machine.
 
 # Security certificates
 
-Check that private key matches certificate:
+Check that private key fingerprint matches that of the certificate:
 
 ```bash
 openssl rsa -noout -modulus -in secrets/airbods_shef_ac_uk.key
 openssl req -noout -modulus -in secrets/airbods_shef_ac_uk.csr
 openssl x509 -noout -modulus -in files/airbods_shef_ac_uk_cert.cer
+```
+
+Check certificate expiration dates:
+
+```bash
+openssl x509 -noout -dates -in secrets/webserver.pem
+openssl x509 -noout -dates -in files/airbods_shef_ac_uk_cert.cer
 ```
 
