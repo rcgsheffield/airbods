@@ -262,11 +262,11 @@ Code examples are contained the the [`examples`](examples) directory.
 The PostgreSQL database can be administered using [psql](https://www.postgresql.org/docs/13/app-psql.html).
 
 ```bash
-# Log in as database user
-su - postgres
-psql
+sudo -u postgres psql
 # List databases
-psql -c "\l"
+sudo -u postgres psql -c "\l"
+# List users
+sudo -u postgres psql -c "\du"
 ```
 
 ## User management

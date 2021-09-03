@@ -32,6 +32,8 @@
       copy:
         src: pg_hba.conf
         dest: /etc/postgresql/12/main/pg_hba.conf
+      notify:
+        - Restart PostgreSQL
     - name: Create postgres user
       user:
         name: postgres
@@ -81,6 +83,8 @@
       postgresql_user:
         user: airbods
         password: "{{ lookup('file', 'secrets/database.txt') }}"
+        # If this doesn't work, run:
+        # sudo -u postgres psql -c "\password airbods"
     - name: Create Airbods database
       become_user: postgres
       postgresql_db:
