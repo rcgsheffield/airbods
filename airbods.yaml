@@ -190,6 +190,14 @@
         name: airflow
         password: "{{ lookup('file', 'secrets/airflow.txt') | password_hash('sha512') }}"
         system: yes
+        create_home: yes
+    - name: Ensure Airflow dir exists
+      file:
+        state: directory
+        path: /home/airflow/airflow
+        owner: airflow
+        group: airflow
+        mode: 0750
     - name: Create Airflow group
       group:
         name: airflow
