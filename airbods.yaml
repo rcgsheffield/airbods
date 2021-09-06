@@ -270,43 +270,22 @@
         mode: 0500
         owner: airflow
         group: airflow
-    # Airflow webserver encryption
-    # https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html#ssl
-    - name: Install webserver private key
+    - name: Install Airflow secrets
       copy:
-        src: secrets/webserver_key.pem
-        dest: /home/airflow/secrets/webserver_key.pem
+        src: "{{ item }}"
+        dest: "{{ secrets_dir }}"
         owner: airflow
         group: airflow
         mode: 0400
-    - name: Install webserver certificate
-      copy:
-        src: secrets/webserver.pem
-        dest: /home/airflow/secrets/webserver.pem
-        owner: airflow
-        group: airflow
-        mode: 0644
-    - name: Install connection string
-      copy:
-        src: secrets/sql_alchemy_conn_localhost.txt
-        dest: "{{ secrets_dir }}/sql_alchemy_conn_localhost.txt"
-        owner: airflow
-        group: airflow
-        mode: 0400
-    - name: Install Airflow connections
-      copy:
-        src: secrets/connections.json
-        dest: "{{ secrets_dir }}/connections.json"
-        owner: airflow
-        group: airflow
-        mode: 0400
-    - name: Install Airflow variables
-      copy:
-        src: secrets/variables.json
-        dest: "{{ secrets_dir }}/variables.json"
-        group: airflow
-        owner: airflow
-        mode: '0400'
+      with_items:
+        # Airflow webserver encryption
+        # https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html#ssl
+        - secrets/webserver_key.pem
+        - secrets/webserver.pem
+        - secrets/sql_alchemy_conn_localhost.txt
+        - secrets/connections.json
+        - secrets/variables.json
+        - secrets/rabbitmq.txt
     - name: Create airflow database user
       become_user: postgres
       postgresql_user:
