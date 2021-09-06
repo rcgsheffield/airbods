@@ -246,6 +246,8 @@
         src: airflow.cfg
         dest: /home/airflow/airflow/airflow.cfg
         owner: airflow
+      notify:
+        - Restart Airflow services
     - name: Secure secrets dir
       file:
         path: "{{ secrets_dir }}"
