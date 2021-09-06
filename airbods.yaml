@@ -246,6 +246,7 @@
         src: airflow.cfg
         dest: /home/airflow/airflow/airflow.cfg
         owner: airflow
+        group: airflow
       notify:
         - Restart Airflow services
     - name: Secure secrets dir

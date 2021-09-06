@@ -165,7 +165,8 @@ ansible-playbook --inventory hosts-prod.yaml --user $USER --ask-become-pass airb
 
 If problems occur, check the logs and try the following steps:
 
-* Reboot the remote system manually
+* Ensure that the Ansible [notify handler](https://docs.ansible.com/ansible/latest/user_guide/playbooks_handlers.html) feature is enabled for any changes you may have have made.
+* Restart the services on the remote host (or perhaps reboot the entire remote system manually)
 * Re-run the script
 * Use Ansible's verbose mode and other [debugging features](https://docs.ansible.com/ansible/latest/user_guide/playbooks_debugger.html)
 
