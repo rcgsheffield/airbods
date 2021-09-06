@@ -285,7 +285,7 @@
         - secrets/sql_alchemy_conn_localhost.txt
         - secrets/connections.json
         - secrets/variables.json
-        - secrets/rabbitmq.txt
+        - secrets/rabbitmq_url.txt
     - name: Create airflow database user
       become_user: postgres
       postgresql_user:

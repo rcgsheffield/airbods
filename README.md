@@ -385,8 +385,8 @@ Service logs are available using the `journalctl` command. The `---since` option
 
 ```bash
 # Airflow service logs
-sudo journalctl -u airflow-worker --since "$(date -I)" # current day
-sudo journalctl -u airflow-webserver --since "$(date -I)"
+sudo journalctl -u airflow-worker --reverse # most recent first
+sudo journalctl -u airflow-webserver --since "$(date -I)"  # current day
 sudo journalctl -u airflow-scheduler --since "$(date -I) 12:00" # this afternoon
 ```
 
