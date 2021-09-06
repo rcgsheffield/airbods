@@ -1,23 +1,25 @@
 ---
-- name: Test Airflow DAGs
+- name: Load Airflow DAGs
   hosts: all
-  remote_user: root
+  become: yes
+  become_user: airflow
   tasks:
-    - name: Test DAGs
-      shell: "{{ airflow_bin_path }}/airflow dags test {{ item }} {{ ansible_date_time.date }}"
-      become: yes
-      become_user: airflow
-      loop:
-        - datacake_devices
-        - datacake
-        - deployments
-
-    # https://airflow.apache.org/docs/apache-airflow/stable/best-practices.html#dag-loader-test
+  # https://airflow.apache.org/docs/apache-airflow/stable/best-practices.html#dag-loader-test
     - name: Load DAGs
-      become: yes
-      become_user: airflow
       shell:
         cmd: "{{ airflow_bin_path }}/python {{ item }}"
       with_fileglob:
         - "{{ airflow_home }}/dags/*.py"
+
+- name: Test Airflow DAGs
+  hosts: all
+  become: yes
+  become_user: airflow
+  tasks:
+    - name: Test DAGs
+      shell: "{{ airflow_bin_path }}/airflow dags test {{ item }} {{ ansible_date_time.date }}"
+      loop:
+        - datacake_devices
+        - datacake
+        - deployments
 ...
