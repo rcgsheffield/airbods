@@ -1,6 +1,8 @@
 ---
+# Airbods deployment script
 # Ansible playbook
-# This playbook defines tasks to deploy the application stack
+# This playbook defines tasks to deploy the application stack.
+# It installs several services and configures them.
 #
 # Table of contents:
 #  * Install PostgreSQL database
@@ -177,6 +179,18 @@
             read_priv: .*
             write_priv: .*
             configure_priv: .*
+    - name: Create RabbitMQ management user
+      rabbitmq_user:
+        node: rabbit@localhost
+        user: admin
+        password: "{{ lookup('file', 'secrets/rabbitmq_admin.txt') }}"
+        tags: administrator
+        # assign full access control
+        permissions:
+          - vhost: /
+            configure_priv: .*
+            read_priv: .*
+            write_priv: .*
     - name: Delete RabbitMQ guest user
       rabbitmq_user:
         node: rabbit@localhost

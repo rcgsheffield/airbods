@@ -20,7 +20,7 @@ Group=airflow
 Type=simple
 ExecStart={{ airflow_bin_path }}/airflow{% if item in ['worker', 'flower'] %} celery{% endif %} {{ item }}
 Restart=always
-RestartSec=10s
+RestartSec=60s
 
 [Install]
 WantedBy=multi-user.target

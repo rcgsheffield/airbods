@@ -16,6 +16,11 @@ from airflow.models.taskinstance import TaskInstance
 
 LOGGER = logging.getLogger(__name__)
 
+DESCRIPTION = """
+This workflow retrieves, stores and transforms the sensor data that is
+downloaded from Datacake.
+"""
+
 
 def flatten_history(devices: Iterable[dict]) -> Iterable[dict]:
     """
@@ -129,6 +134,7 @@ with airflow.DAG(
         start_date=datetime.datetime(2021, 4, 14,
                                      tzinfo=datetime.timezone.utc),
         schedule_interval=datetime.timedelta(hours=1),
+        description=DESCRIPTION,
 ) as dag:
     # Download raw data for all devices
     all_devices_history = GraphQLHttpOperator(

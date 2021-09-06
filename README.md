@@ -165,9 +165,11 @@ ansible-playbook --inventory hosts-prod.yaml --user $USER --ask-become-pass airb
 
 If problems occur, check the logs and try the following steps:
 
+* Re-run the deployment script
+* Check service status (see the Monitoring section below) and logs.
+* Check that each service can connect to the other relevant services.
 * Ensure that the Ansible [notify handler](https://docs.ansible.com/ansible/latest/user_guide/playbooks_handlers.html) feature is enabled for any changes you may have have made.
 * Restart the services on the remote host (or perhaps reboot the entire remote system manually)
-* Re-run the script
 * Use Ansible's verbose mode and other [debugging features](https://docs.ansible.com/ansible/latest/user_guide/playbooks_debugger.html)
 
 # Usage
@@ -379,12 +381,13 @@ sudo -u airflow /opt/airflow/bin/airflow info
 
 ## View logs
 
-Service logs are available using the `journalctl` command:
+Service logs are available using the `journalctl` command. The `---since` option is used to filter by time.
 
 ```bash
-sudo journalctl -u airflow-worker --since "$(date -I)"
+# Airflow service logs
+sudo journalctl -u airflow-worker --since "$(date -I)" # current day
 sudo journalctl -u airflow-webserver --since "$(date -I)"
-sudo journalctl -u airflow-scheduler --since "$(date -I) 12:00"
+sudo journalctl -u airflow-scheduler --since "$(date -I) 12:00" # this afternoon
 ```
 
 PostgreSQL database service logs:
@@ -394,6 +397,18 @@ sudo systemctl status postgresql
 # List available log files (they're rotated regularly)
 sudo ls -l /var/log/postgresql
 sudo tail /var/log/postgresql/postgresql-12-main.log
+```
+
+RabbitMQ message broker service logs:
+
+```bash
+sudo journalctl -u rabbitmq-server --since "$(date -I)"
+```
+
+Redis database service logs:
+
+```bash
+sudo journalctl -u redis --since "$(date -I)"
 ```
 
 ## System resource utilisation
@@ -420,7 +435,16 @@ ssh -L 5555:127.0.0.1:5555 $USER@airbods.shef.ac.uk
 
  Then open http://localhost:5555 in a web browser on your computer.
 
-## Message broker management console
+## Message broker
+
+See: RabbitMQ `rabbitmqctl` and [Management Command Line Tool](https://www.rabbitmq.com/management-cli.html). Examples:
+
+```bash
+# List users
+sudo -u rabbitmq rabbitmqctl list_users
+```
+
+### Management console
 
 SSH tunnel port 15672 on the remote machine 127.0.0.1:15672 using the `ssh` command or `putty`.
 
