@@ -128,7 +128,7 @@
   tasks:
     - name: Install Redis package
       apt:
-        name: redis
+        name: redis=5.*
   handlers:
     - name: Restart Redis service
       service:
@@ -143,7 +143,7 @@
   tasks:
     - name: Install RabbitMQ package
       apt:
-        name: rabbitmq-server
+        name: rabbitmq-server=3.*
     # https://stackoverflow.com/a/45475646
     - name: RabbitMQ set HOSTNAME
       lineinfile:
