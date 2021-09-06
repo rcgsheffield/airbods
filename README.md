@@ -292,21 +292,21 @@ Role membership can also be [managed](https://www.postgresql.org/docs/13/role-me
 
 # Data pipeline management
 
-The data pipelines are managed using [Apache Airflow](https://airflow.apache.org/docs/apache-airflow/stable/index.html).
+The data pipelines are managed using [Apache Airflow](https://airflow.apache.org/docs/apache-airflow/stable/index.html). See the [Airflow tutorial](https://airflow.apache.org/docs/apache-airflow/stable/tutorial.html).
 
 ## Airflow web interface
 
 The is an Airflow GUI available via the [webserver](https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html) service available at https://airbods.shef.ac.uk.
 
-To test that this is available:
+To test that this is available using `curl`. The `--insecure` flag is used to prevent the certificate being checked (because the certificate used is not signed by a certificate authority (CA) and is self-signed.)
 
 ```bash
-curl -I https://airbods.shef.ac.uk
+curl --insecure --head https://airbods.shef.ac.uk
 ```
 
 ## Airflow command line interface
 
-To run these commands, you must log in as the user `airflow`:
+To run these commands, you must log in as the user `airflow` or prefix the commands with `sudo -u airflow` to run them as that service user.
 
 ```bash
 sudo su - airflow --shell /bin/bash
@@ -317,7 +317,7 @@ sudo su - airflow --shell /bin/bash
 The state of failed tasks may be cleared using the GUI under Browse > DAG Runs. You can also use the CLI with the [tasks clear](https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html#clear) command. This may be applied to an entire DAG run, or a subset of tasks, for a specified time range.
 
 ```bash
-/opt/airflow/bin/airflow tasks clear $DAG_ID --start-date "YYYY-MM-DD" --end-date "YYYY-MM-DD"
+sudo -u airflow /opt/airflow/bin/airflow tasks clear $DAG_ID --start-date "YYYY-MM-DD" --end-date "YYYY-MM-DD"
 ```
 
 ## Backfill
@@ -325,8 +325,8 @@ The state of failed tasks may be cleared using the GUI under Browse > DAG Runs. 
 Using the Airflow CLI, use the [backfill command](https://airflow.apache.org/docs/apache-airflow/stable/dag-run.html#backfill) (see [CLI backfill docs](https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html#backfill)) to run historic data pipelines:
 
 ```bash
-# /opt/airflow/bin/airflow dags backfill $DAG_ID -s $START_DATE -t <task_regex>
-/opt/airflow/bin/airflow dags backfill datacake -s 2021-04-15 --verbose
+# /opt/airflow/bin/airflow dags backfill $DAG_ID -s $START_DATE -e $END_DATE -t <task_regex>
+sudo -u airflow /opt/airflow/bin/airflow dags backfill datacake --start-date "2021-04-15" --end-date "$(date -I)"
 ```
 
 # Metadata
