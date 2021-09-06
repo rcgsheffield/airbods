@@ -411,7 +411,7 @@ free --mega
 
 ## Worker monitoring
 
-You can look at the workers and tasks using [Flower](https://flower.readthedocs.io/en/latest/), a celery monitoring tool. This can be accessed using an SSH tunnel for port 5555:
+You can look at the workers and tasks using [Flower](https://flower.readthedocs.io/en/latest/), a celery monitoring tool. (Also see [Airflow Flower docs](https://airflow.apache.org/docs/apache-airflow/stable/security/flower.html).) This can be accessed using an SSH tunnel for port 5555:
 
 ```bash
 ssh -L 5555:127.0.0.1:5555 $USER@airbods.shef.ac.uk
