@@ -298,11 +298,13 @@ The data pipelines are managed using [Apache Airflow](https://airflow.apache.org
 
 The is an Airflow GUI available via the [webserver](https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html) service available at https://airbods.shef.ac.uk.
 
-To test that this is available using `curl`. The `--insecure` flag is used to prevent the certificate being checked (because the certificate used is not signed by a certificate authority (CA) and is self-signed.)
+To test that this is available using `curl` using the command below, the `--insecure` flag is used to prevent the certificate being checked (because the certificate used is not signed by a certificate authority (CA) and is self-signed.)
 
 ```bash
 curl --insecure --head https://airbods.shef.ac.uk
 ```
+
+The DAG calendar view is useful to give an overview of the entire history of the workflow.
 
 ## Airflow command line interface
 
@@ -326,12 +328,14 @@ Using the Airflow CLI, use the [backfill command](https://airflow.apache.org/doc
 
 ```bash
 # /opt/airflow/bin/airflow dags backfill $DAG_ID -s $START_DATE -e $END_DATE -t <task_regex>
-sudo -u airflow /opt/airflow/bin/airflow dags backfill datacake --start-date "2021-04-15" --end-date "$(date -I)"
+sudo -u airflow /opt/airflow/bin/airflow dags backfill datacake --start-date "2021-04-15" --end-date "$(date -I)" --rerun-failed-tasks
 ```
 
 # Datacake
 
 The workflows use the Datacake [GraphQL API](https://docs.datacake.de/api/graphql-api), which communicates over authenticated HTTPS. Please read those documents for an introduction to using this. This is implemented using an Airflow [custom operator](https://airflow.apache.org/docs/apache-airflow/stable/howto/custom-operator.html) called `GraphQLHttpOperator` which is a subclass of the built-in `SimpleHttpOperator`. There is a browser-based interface at https://api.datacake.co/graphql/ where you need to input the access token and you can run test GraphQL queries.
+
+The raw data are stored on the virtual machine in the directory `/home/airflow/data` as JSON files, one for each hourly batch operation.
 
 # Metadata
 
@@ -441,6 +445,12 @@ Task summary
 
 ```bash
 top
+```
+
+Processor-related statistics:
+
+```bash
+mpstat
 ```
 
 Memory usage in MB:
