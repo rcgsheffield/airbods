@@ -128,7 +128,7 @@
   tasks:
     - name: Install Redis package
       apt:
-        name: redis=5.*
+        name: redis
   handlers:
     - name: Restart Redis service
       service:
