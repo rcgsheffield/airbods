@@ -14,6 +14,18 @@ import psycopg2.extras
 
 LOGGER = logging.getLogger(__name__)
 
+DESCRIPTION = """
+Retrieve deployment data from Google drive and insert into database 
+"""
+
+DAG_KWARGS = dict(
+    dag_id='deployments',
+    # This isn't time-dependent
+    start_date=airflow.utils.dates.days_ago(1),
+    schedule_interval=datetime.timedelta(days=1),
+    description=DESCRIPTION,
+)
+
 
 def clean_header(s: str) -> str:
     s = s.strip().casefold().replace(' ', '_')
@@ -116,12 +128,7 @@ def insert_deployments(*args, task_instance, test_mode: bool = False,
         connection.commit()
 
 
-with airflow.DAG(
-        dag_id='deployments',
-        # This isn't time-dependent
-        start_date=airflow.utils.dates.days_ago(1),
-        schedule_interval=datetime.timedelta(days=1),
-) as dag:
+with airflow.DAG(**DAG_KWARGS) as dag:
     deployments_info = Variable.get('deployments', deserialize_json=True)
     get_deployments = PythonOperator(
         task_id='get_deployments',

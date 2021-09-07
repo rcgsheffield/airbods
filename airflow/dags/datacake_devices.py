@@ -9,11 +9,16 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
 
 LOGGER = logging.getLogger(__name__)
 
+DESCRIPTION = """
+Retrieve sensor data from Datacake and insert into database 
+"""
+
 with airflow.DAG(
         dag_id='datacake_devices',
         # We can't retrieve historical data, so no need to back-fill
         start_date=airflow.utils.dates.days_ago(1),
         schedule_interval=datetime.timedelta(hours=6),
+        description=DESCRIPTION,
 ) as dag:
     # Download raw data for all devices
     all_devices = GraphQLHttpOperator(
