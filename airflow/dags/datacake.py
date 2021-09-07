@@ -21,6 +21,15 @@ This workflow retrieves, stores and transforms the sensor data that is
 downloaded from Datacake.
 """
 
+# Workflow properties
+DAG_KWARGS = dict(
+    dag_id='datacake',
+    # Data collection start date 14th April 2021
+    start_date=datetime.datetime(2021, 4, 14, tzinfo=datetime.timezone.utc),
+    schedule_interval=datetime.timedelta(hours=1),
+    description=DESCRIPTION,
+)
+
 
 def flatten_history(devices: Iterable[dict]) -> Iterable[dict]:
     """
@@ -129,14 +138,7 @@ def save_data(*args, task_instance: TaskInstance, execution_date, **kwargs):
         return file.name
 
 
-with airflow.DAG(
-        dag_id='datacake',
-        # Data collection start date 14th April 2021
-        start_date=datetime.datetime(2021, 4, 14,
-                                     tzinfo=datetime.timezone.utc),
-        schedule_interval=datetime.timedelta(hours=1),
-        description=DESCRIPTION,
-) as dag:
+with airflow.DAG(**DAG_KWARGS) as dag:
     # Download raw data for all devices
     # https://docs.datacake.de/api/graphql-api/using-graphql#historical-data
     all_devices_history = GraphQLHttpOperator(
