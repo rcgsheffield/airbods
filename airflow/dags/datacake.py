@@ -28,7 +28,8 @@ def flatten_history(devices: Iterable[dict]) -> Iterable[dict]:
     """
     row_count = 0
     for device in devices:
-        for row in json.loads(device.pop('history')):
+        # The history value is a string containing a JSON list of data rows
+        for row in json.loads(device.pop('history') or '[]'):
             row_count += 1
             yield dict(**device, **row)
 
@@ -137,6 +138,7 @@ with airflow.DAG(
         description=DESCRIPTION,
 ) as dag:
     # Download raw data for all devices
+    # https://docs.datacake.de/api/graphql-api/using-graphql#historical-data
     all_devices_history = GraphQLHttpOperator(
         http_conn_id='datacake',
         task_id='all_devices_history',

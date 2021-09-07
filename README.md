@@ -329,6 +329,10 @@ Using the Airflow CLI, use the [backfill command](https://airflow.apache.org/doc
 sudo -u airflow /opt/airflow/bin/airflow dags backfill datacake --start-date "2021-04-15" --end-date "$(date -I)"
 ```
 
+# Datacake
+
+The workflows use the Datacake [GraphQL API](https://docs.datacake.de/api/graphql-api), which communicates over authenticated HTTPS. Please read those documents for an introduction to using this. This is implemented using an Airflow [custom operator](https://airflow.apache.org/docs/apache-airflow/stable/howto/custom-operator.html) called `GraphQLHttpOperator` which is a subclass of the built-in `SimpleHttpOperator`. There is a browser-based interface at https://api.datacake.co/graphql/ where you need to input the access token and you can run test GraphQL queries.
+
 # Metadata
 
 The following are the items in the database. There are two types of object: tables and views. Tables contain rows of data and views are predefined SQL queries that display, merge or process that data in a certain way.
