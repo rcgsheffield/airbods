@@ -407,8 +407,56 @@
         PGADMIN_PLATFORM_TYPE: debian
         PGADMIN_SETUP_PASSWORD: "{{ lookup('file', 'secrets/pgadmin.txt') }}"
         PGADMIN_SETUP_EMAIL: j.heffer@sheffield.ac.uk
+    - name: Delete Apache2 Default Page
+      file:
+        state: absent
+        path: /var/www/html/index.html
+    - name: Blank Apache2 Default Page
+      file:
+        state: touch
+        path: /var/www/html/index.html
     - name: Remove Apache2 default site
       file:
         path: /etc/apache2/sites-enabled/000-default.conf
         state: absent
+      notify:
+        - Restart Apache
+    # HTTPS Configuration
+    # https://ubuntu.com/server/docs/web-servers-apache
+    - name: Install SSL certificate
+      copy:
+        src: airbods_shef_ac_uk_cert.cer
+        dest: /etc/ssl/certs/airbods_shef_ac_uk_cert.cer
+    - name: Install SSL private key
+      copy:
+        src: secrets/airbods_shef_ac_uk.key
+        dest: /etc/ssl/private/airbods_shef_ac_uk.key
+        mode: 0600
+    - name: Enable mod_ssl module
+      shell: "a2enmod ssl"
+    - name: Configure Apache2 for HTTPS
+      shell: "a2ensite default-ssl"
+      notify:
+        - Restart Apache
+    - name: Disable default SSL config
+      file:
+        state: absent
+        path: /etc/apache2/sites-enabled/default-ssl.conf
+    - name: Install Apache config
+      copy:
+        src: airbods.conf
+        dest: /etc/apache2/sites-available/airbods.conf
+    - name: Enable Apache config
+      file:
+        # Create symlink
+        path: /etc/apache2/sites-enabled/airbods.conf
+        state: link
+        src: /etc/apache2/sites-available/airbods.conf
+      notify:
+        - Restart Apache
+  handlers:
+    - name: Restart Apache
+      systemd:
+        name: apache2
+        state: restarted
 ...
