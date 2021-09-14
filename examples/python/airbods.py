@@ -9,13 +9,13 @@ from getpass import getpass
 import pandas as pd
 import sqlalchemy.engine.url
 
-USERNAME = 'airbods'
+USERNAME = ''  # ENTER YOUR USERNAME HERE
 HOST = 'airbods.shef.ac.uk'
 DATABASE = 'airbods'
 
 url = sqlalchemy.engine.url.URL(
     drivername='postgresql',
-    username=USERNAME,
+    username=USERNAME or input('Enter username: '),
     password=getpass('Enter password for {}@{}: '.format(USERNAME, HOST)),
     host=HOST,
     database=DATABASE,
@@ -49,4 +49,4 @@ filename = "airbods_{}.csv".format(pd.Timestamp.now().isoformat())
 df.to_csv(filename)
 
 # Export to Excel
-#df.to_excel('airbods.xlsx')
+# df.to_excel('airbods.xlsx')

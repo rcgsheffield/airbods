@@ -19,7 +19,7 @@ library(DBI)
 # Connect to the default PostgreSQL database
 con <- dbConnect(RPostgres::Postgres(),
                  host='airbods.shef.ac.uk',
-                 user='airbods',
+                 user='', # ENTER YOUR USERNAME HERE
                  password=keyring::key_get('airbods'),
                  dbname ='airbods'
                  )

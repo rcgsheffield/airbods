@@ -176,12 +176,22 @@ If problems occur, check the logs and try the following steps:
 
 There are several ways to interact with and control each part of the system.
 
+## SQL database
+
+There are several ways to connect to the database, either using software packages or programming languages. See the [examples](examples) directory for a list of available tools.
+
+The [connection string](https://www.postgresql.org/docs/12/libpq-connect.html#LIBPQ-CONNSTRING) is as follows:
+
+```uri
+postgresql://$USERNAME:$PASSWORD@airbods.shef.ac.uk/airbods
+```
+
 ### PostgreSQL interactive terminal
 
 You can connect to the database with [psql](https://www.postgresql.org/docs/12/app-psql.html) as follows:
 
 ```bash
-psql --host=airbods.shef.ac.uk --dbname=airbods --username=airbods
+psql --host=airbods.shef.ac.uk --dbname=airbods --username=$USERNAME
 ```
 
 You may need to change the username to something else. You can enter the password manually or use a [pgpass](https://www.postgresql.org/docs/12/libpq-pgpass.html) file.
@@ -189,7 +199,7 @@ You may need to change the username to something else. You can enter the passwor
 You can run a command by using the shell or as follows:
 
 ```bash
-psql --host=airbods.shef.ac.uk --dbname=airbods --username=airbods --command "SELECT now();"
+psql --host=airbods.shef.ac.uk --dbname=airbods --username=$USERNAME --command "SELECT now();"
 ```
 
 ### Backup

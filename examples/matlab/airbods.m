@@ -12,8 +12,8 @@ https://uk.mathworks.com/help/database/ug/import-data-from-postgresql-database-t
 %}
 
 % Connect to the database
-datasource = "Airbods Dev";
-username = "airbods";
+datasource = "Airbods";
+username = ""; % ENTER YOUR USERNAME HERE
 password = input("Enter password: ", "s");
 conn = postgresql(datasource, username, password);
 
