@@ -176,21 +176,6 @@ If problems occur, check the logs and try the following steps:
 
 There are several ways to interact with and control each part of the system.
 
-## SQL database
-
-The database service may be controlled using `systemd`:
-
-```bash
-# Restart PostgreSQL service
-sudo systemctl restart postgresql
-```
-
-To connect to the SQL database, see code [examples](examples).
-
-### pgAdmin web interface
-
-The [pgAdmin](https://www.pgadmin.org/) tool runs behind an Apache HTTPD web server using WSGI in the file `/etc/apache2/conf-enabled/pgadmin4.conf` at the root URL `/pgadmin4`.
-
 ### PostgreSQL interactive terminal
 
 You can connect to the database with [psql](https://www.postgresql.org/docs/12/app-psql.html) as follows:
@@ -260,6 +245,33 @@ Run unit tests:
 python -m unittest --failfast
 ```
 
+# Database administration
+
+The database service may be controlled using `systemd`:
+
+```bash
+# Restart PostgreSQL service
+sudo systemctl restart postgresql
+```
+
+To connect to the SQL database, see code [examples](examples).
+
+## pgAdmin web interface
+
+The pgAdmin tool is available at https://airbods.shef.ac.uk/pgadmin4.
+
+### Add pgAdmin user
+
+These user accounts are used to access pgAdmin only (not the SQL database itself.)
+
+1. Once logged in, to open the [User Management](https://www.pgadmin.org/docs/pgadmin4/latest/user_management.html) panel, click on the arrow in the top-right corner of the screen.
+2. Click "Users"
+3. Click the "+" icon on the top-right of the "User Management" window
+4. Fill in the form fields
+   1. Email
+   2. Role = Administrator
+5. hit "Enter"
+
 # Data access
 
 Code examples are contained the the [`examples`](examples) directory.
@@ -280,6 +292,34 @@ sudo -u postgres psql -c "\du"
 
 A database role exists for end users called `researcher`.
 
+### Create users using pgAdmin
+
+1. Log into the pgAdmin tool
+2. On the browser (left pane) select the Airbods server
+3. Right-click on the server and click on "Create" -> "Login/Group Role"
+4. On the first tab called "General" in the name field, enter a username (don't use special characters)
+5. On the second tab, "Definition," enter a unique password
+6. On the "Privileges" tab, set "Can login?" to "Yes"
+7. On the "Membership" tab, next to "Member of" click on the "Select roles" box and select the "researcher" role.
+
+The SQL tab should show something like this:
+
+```sql
+CREATE ROLE joebloggs WITH
+	LOGIN
+	NOSUPERUSER
+	NOCREATEDB
+	NOCREATEROLE
+	INHERIT
+	NOREPLICATION
+	CONNECTION LIMIT -1
+	PASSWORD 'xxxxxx';
+	
+GRANT researcher TO joebloggs;
+```
+
+### Create users using the CLI
+
 Create new user credentials using the [createuser](https://www.postgresql.org/docs/current/app-createuser.html) shell command:
 
 ```bash
@@ -289,7 +329,7 @@ createuser --pwprompt --role=researcher
 You could also do this using [CREATE ROLE](https://www.postgresql.org/docs/13/sql-createrole.html):
 
 ```sql
--- CREATE USER joe_bloggs LOGIN PASSWORD 'ChangeMe' IN ROLE researcher;
+CREATE USER joebloggs LOGIN PASSWORD 'xxxxxx' IN ROLE researcher;
 ```
 
 Role membership can also be [managed](https://www.postgresql.org/docs/13/role-membership.html) for existing users.
@@ -300,12 +340,11 @@ The data pipelines are managed using [Apache Airflow](https://airflow.apache.org
 
 ## Airflow web interface
 
-The is an Airflow GUI available via the [webserver](https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html) service available at https://airbods.shef.ac.uk.
-
-To test that this is available using `curl` using the command below, the `--insecure` flag is used to prevent the certificate being checked (because the certificate used is not signed by a certificate authority (CA) and is self-signed.)
+The is an Airflow GUI available via the [webserver](https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html) service which is available via SSH tunnel. To test that this is available using `curl` using the command below, the `--insecure` flag is used to prevent the certificate being checked (because the certificate used is not signed by a certificate authority (CA) and is self-signed.)
 
 ```bash
-curl --insecure --head https://airbods.shef.ac.uk
+ssh -L 4443:127.0.0.1:4443 $USER@airbods.shef.ac.uk
+curl --insecure --head https://localhost:4443
 ```
 
 The DAG calendar view is useful to give an overview of the entire history of the workflow.
@@ -445,7 +484,7 @@ sudo tail /var/log/postgresql/postgresql-12-main.log
 RabbitMQ message broker service logs:
 
 ```bash
-sudo journalctl -u rabbitmq-server --since "$(date -I)"
+sudo journalctl -u rabbitmq-server --since "1 hour ago"
 
 # View logs for a particular node
 sudo -u rabbitmq tail /var/log/rabbitmq/rabbit@localhost.log

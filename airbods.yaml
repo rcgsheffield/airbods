@@ -9,6 +9,7 @@
 #  * Install Redis database
 #  * Install RabbitMQ message broker
 #  * Install Apache Airflow
+#  * Install pgAdmin
 
 - name: Install miscellaneous packages
   hosts: all
@@ -377,6 +378,10 @@
         daemon_reload: true
       loop: "{{ service }}"
 
+# pgAdmin
+# pgAdmin runs behind an Apache HTTPD web server using WSGI in the file
+# /etc/apache2/conf-enabled/pgadmin4.conf at the root URL /pgadmin4.
+# curl --head https://airbods.shef.ac.uk/pgadmin4
 - name: Install pgAdmin
   # pgAdmin docs
   # https://www.pgadmin.org/docs/pgadmin4/latest
@@ -455,6 +460,12 @@
         src: /etc/apache2/sites-available/airbods.conf
       notify:
         - Restart Apache
+    - name: Create pgAdmin role
+      become_user: postgres
+      postgresql_user:
+        user: pgadmin
+        password: "{{ lookup('file', 'secrets/pgadmin.txt') }}"
+        role_attr_flags: LOGIN,CREATEROLE
   handlers:
     - name: Restart Apache
       systemd:
