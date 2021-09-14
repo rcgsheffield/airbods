@@ -61,8 +61,6 @@ You may need to [install Ansible in a Python virtual environment](https://docs.a
 source ~/ansible/bin/activate
 ```
 
-
-
 ## Key generation
 
 Security keys, certificate requests and certificates may be generated using `openssl`. Certificate-authority-signed certificates were retrieved via ITS Helpdesk. This is particularly important for the SQL database because this service will be exposed to the risks associated with access via the public internet.
@@ -92,6 +90,8 @@ ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
 # Allow that private key to automatically log in by appending public key to authorized_keys list
 cat .ssh/id_rsa.pub >> .ssh/authorized_keys
 ```
+
+The tool `ssh-agent` is useful to save time by storing the password for encrypted private keys so you don't have to repeatedly type it in.
 
 ### Superuser access
 
@@ -186,6 +186,10 @@ sudo systemctl restart postgresql
 ```
 
 To connect to the SQL database, see code [examples](examples).
+
+### pgAdmin web interface
+
+The [pgAdmin](https://www.pgadmin.org/) tool runs behind an Apache HTTPD web server using WSGI in the file `/etc/apache2/conf-enabled/pgadmin4.conf` at the root URL `/pgadmin4`.
 
 ### PostgreSQL interactive terminal
 
@@ -405,7 +409,10 @@ systemctl status airflow-webserver
 systemctl status airflow-scheduler
 systemctl status airflow-worker
 systemctl status redis
-systemctl status rabbitmq-server
+
+# RabbitMQ
+sudo systemctl status rabbitmq-server
+udo -u rabbitmq rabbitmq-diagnostics status
 
 # View PostgreSQL cluster status
 systemctl status postgresql
@@ -439,6 +446,15 @@ RabbitMQ message broker service logs:
 
 ```bash
 sudo journalctl -u rabbitmq-server --since "$(date -I)"
+
+# View logs for a particular node
+sudo -u rabbitmq tail /var/log/rabbitmq/rabbit@localhost.log
+
+# List RabbitMQ log files
+ls -lt  /var/log/rabbitmq/
+
+# List RabbitMQ crash log files
+sudo ls -lt  /var/log/rabbitmq/log/
 ```
 
 Redis database service logs:
@@ -495,6 +511,16 @@ ssh -L 15672:127.0.0.1:15672 $USER@airbods.shef.ac.uk
 ```
 
 Then open http://localhost:15672 on your local machine.
+
+### Troubleshooting
+
+See RabbitMQ docs [Troubleshooting Guidance](https://www.rabbitmq.com/troubleshooting.html).
+
+If there is a problem, try restarting the service:
+
+```bash
+sudo systemctl restart rabbitmq-server
+```
 
 # Security certificates
 

@@ -10,6 +10,18 @@
 #  * Install RabbitMQ message broker
 #  * Install Apache Airflow
 
+- name: Install miscellaneous packages
+  hosts: all
+  become: yes
+  pre_tasks:
+    - name: Install utilities
+      apt:
+        update_cache: yes
+        name:
+          - wget
+          - curl
+          - ca-certificates
+
 - name: Install PostgreSQL database
   hosts: all
   become: yes
@@ -157,7 +169,8 @@
         name: rabbitmq-server
         state: started
     - name: Enable RabbitMQ management console
-      shell: rabbitmq-plugins enable rabbitmq_management
+      shell:
+        cmd: "rabbitmq-plugins enable rabbitmq_management"
     - name: Create RabbitMQ vhost
       rabbitmq_vhost:
         # This is required to fix the error "unable to connect to epmd (port
@@ -363,4 +376,39 @@
         state: restarted
         daemon_reload: true
       loop: "{{ service }}"
+
+- name: Install pgAdmin
+  # pgAdmin docs
+  # https://www.pgadmin.org/docs/pgadmin4/latest
+  hosts: all
+  become: yes
+  tasks:
+    # pgAdmin 4 (APT) download and installation instructions
+    # https://www.pgadmin.org/download/pgadmin-4-apt/
+    - name: Install pgAdmin APT public key
+      apt_key:
+        url: "https://www.pgadmin.org/static/packages_pgadmin_org.pub"
+    - name: Install pgAdmin APT respository
+      apt_repository:
+        # Use lsb_release -cs to get the Ubuntu version
+        repo: "deb https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/focal pgadmin4 main"
+    - name: Install pgAdmin
+      apt:
+        update_cache: yes
+        name:
+          # Server mode (web app)
+          - pgadmin4-web
+    - name: Configure pgAdmin webserver
+      # Run in silent mode
+      # https://postgrespro.com/list/thread-id/2530260
+      shell:
+        cmd: "/usr/pgadmin4/bin/setup-web.sh --yes"
+      environment:
+        PGADMIN_PLATFORM_TYPE: debian
+        PGADMIN_SETUP_PASSWORD: "{{ lookup('file', 'secrets/pgadmin.txt') }}"
+        PGADMIN_SETUP_EMAIL: j.heffer@sheffield.ac.uk
+    - name: Remove Apache2 default site
+      file:
+        path: /etc/apache2/sites-enabled/000-default.conf
+        state: absent
 ...
