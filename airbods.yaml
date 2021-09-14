@@ -398,6 +398,7 @@
         name:
           # Server mode (web app)
           - pgadmin4-web
+    # This script will install Apache HTTPD web server
     - name: Configure pgAdmin webserver
       # Run in silent mode
       # https://postgrespro.com/list/thread-id/2530260
