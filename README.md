@@ -16,6 +16,7 @@ The system comprises two major parts:
 
 * **Workflow Orchestrator:** The data pipelines are implemented using a workflow orchestrator called [Apache Airflow](https://airflow.apache.org/).
 * **Database:** The data are stored in a relational database management system implemented using [PostgreSQL](https://www.postgresql.org/).
+  * A web-based [database administration interface](https://airbods.shef.ac.uk/pgadmin4) is available to manage this database.
 
 There is a simple overview of this in the [architecture diagram](https://drive.google.com/file/d/1gzuFhhOR7JmASPKYVPKwvyLrUiUHpojA/view?usp=sharing). The workflow orchestrator comprises the subcomponents inside the black dotted line. The user roles are represented by red person icons. The cloud services are shown as blue clouds. The services are represented as green rectangles. The databases are shown as yellow cylinders.
 
@@ -255,6 +256,10 @@ Run unit tests:
 python -m unittest --failfast
 ```
 
+# Data access
+
+Code examples are contained the the [`examples`](examples) directory.
+
 # Database administration
 
 The database service may be controlled using `systemd`:
@@ -268,7 +273,22 @@ To connect to the SQL database, see code [examples](examples).
 
 ## pgAdmin web interface
 
-The pgAdmin tool is available at https://airbods.shef.ac.uk/pgadmin4.
+The pgAdmin tool is available at https://airbods.shef.ac.uk/pgadmin4. It is run by an Apache `httpd` server (the service name is `apache2`.)
+
+### Configure server
+
+The connection to the database must be configured using the [Server Dialogue](https://airbods.shef.ac.uk/pgadmin4/help/help/server_dialog.html).
+
+1. If no servers are configured, click "Create Server"
+2. On the "General" tab, populate these fields:
+   1. Name: `Airbods`
+   2. Shared: `Yes`
+3. On the "Connection" tab, populate these fields:
+   1. Host name: `localhost`
+   2. Username: `pgadmin`
+   3. Password: `***************` (this must be kept secret)
+   4. Save password: `Yes`
+4. Click "Save"
 
 ### Add pgAdmin user
 
@@ -282,27 +302,9 @@ These user accounts are used to access pgAdmin only (not the SQL database itself
    2. Role = Administrator
 5. hit "Enter"
 
-# Data access
-
-Code examples are contained the the [`examples`](examples) directory.
-
-# Database administration
-
-The PostgreSQL database can be administered using [psql](https://www.postgresql.org/docs/13/app-psql.html).
-
-```bash
-sudo -u postgres psql
-# List databases
-sudo -u postgres psql -c "\l"
-# List users
-sudo -u postgres psql -c "\du"
-```
-
-## User management
-
-A database role exists for end users called `researcher`.
-
 ### Create users using pgAdmin
+
+Follow the steps below to create a new login (user credentials) to access the SQL database.
 
 1. Log into the pgAdmin tool
 2. On the browser (left pane) select the Airbods server
@@ -311,8 +313,9 @@ A database role exists for end users called `researcher`.
 5. On the second tab, "Definition," enter a unique password
 6. On the "Privileges" tab, set "Can login?" to "Yes"
 7. On the "Membership" tab, next to "Member of" click on the "Select roles" box and select the "researcher" role.
+8. Click "Save"
 
-The SQL tab should show something like this:
+As a check, the SQL tab should show something like this:
 
 ```sql
 CREATE ROLE joebloggs WITH
@@ -327,6 +330,22 @@ CREATE ROLE joebloggs WITH
 	
 GRANT researcher TO joebloggs;
 ```
+
+## PostgreSQL CLI
+
+The PostgreSQL database can be administered using [psql](https://www.postgresql.org/docs/13/app-psql.html).
+
+```bash
+sudo -u postgres psql
+# List databases
+sudo -u postgres psql -c "\l"
+# List users
+sudo -u postgres psql -c "\du"
+```
+
+## User management
+
+A database role exists for end users called `researcher`.
 
 ### Create users using the CLI
 
@@ -467,6 +486,9 @@ udo -u rabbitmq rabbitmq-diagnostics status
 systemctl status postgresql
 pg_lsclusters
 
+# pgAdmin4 web server
+sudo systemctl status apache2
+
 # Airflow
 sudo -u airflow /opt/airflow/bin/airflow info
 ```
@@ -530,6 +552,19 @@ Memory usage in MB:
 
 ```bash
 free --mega
+```
+
+Storage space usage
+
+```bash
+df -h
+```
+
+There are several tools to analyse disk usage, such as `ncdu`:
+
+```bash
+sudo apt install ncdu
+sudo ncdu /home
 ```
 
 ## Worker monitoring
