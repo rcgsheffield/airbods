@@ -23,6 +23,7 @@ with airflow.DAG(
     # Download raw data for all devices
     all_devices = GraphQLHttpOperator(
         task_id='all_devices',
+        doc='Retrieve Datacake device info',
         http_conn_id='datacake',
         retry_exponential_backoff=True,
         # Jinja escape characters for GraphQL syntax
@@ -68,6 +69,7 @@ with airflow.DAG(
     # Insert or update values
     merge_devices = PostgresOperator(
         task_id='merge_devices',
+        doc='Insert device info into database',
         postgres_conn_id='database',
         sql=textwrap.dedent("""
         INSERT INTO

@@ -132,6 +132,7 @@ with airflow.DAG(**DAG_KWARGS) as dag:
     deployments_info = Variable.get('deployments', deserialize_json=True)
     get_deployments = PythonOperator(
         task_id='get_deployments',
+        doc='Download Google Sheet deployment info',
         python_callable=get_deployments_values,
         op_kwargs=dict(
             # Arguments for GSheetsHook.get_values
@@ -144,6 +145,7 @@ with airflow.DAG(**DAG_KWARGS) as dag:
 
     update_deployments = PythonOperator(
         task_id='update_deployments',
+        doc='Insert deployment info into database',
         python_callable=insert_deployments,
     )
 

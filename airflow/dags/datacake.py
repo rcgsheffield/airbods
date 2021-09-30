@@ -143,6 +143,7 @@ with airflow.DAG(**DAG_KWARGS) as dag:
     # https://docs.datacake.de/api/graphql-api/using-graphql#historical-data
     all_devices_history = GraphQLHttpOperator(
         http_conn_id='datacake',
+        doc='Retrieve Datacake device historical raw data',
         task_id='all_devices_history',
         retry_exponential_backoff=True,
         # Jinja escape characters for GraphQL syntax
@@ -168,6 +169,7 @@ with airflow.DAG(**DAG_KWARGS) as dag:
         task_id='serialise_raw',
         python_callable=save_data,
         provide_context=True,
+        doc='Save raw data to disk',
     )
 
     # Load raw data to database
@@ -175,6 +177,7 @@ with airflow.DAG(**DAG_KWARGS) as dag:
         task_id='bulk_load',
         python_callable=bulk_load_values,
         provide_context=True,
+        doc='Insert raw data into the database',
     )
 
     # Remove old data and insert transformed data (idempotent in a single
@@ -182,6 +185,7 @@ with airflow.DAG(**DAG_KWARGS) as dag:
     clean = PostgresOperator(
         task_id='clean',
         postgres_conn_id='database',
+        doc='Transform raw data into clean data',
         sql=textwrap.dedent("""
         -- Defer unique constraint until so we can DELETE and then INSERT 
         -- before checking uniqueness after this atomic transaction completes.
