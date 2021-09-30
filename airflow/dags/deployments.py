@@ -134,6 +134,7 @@ with airflow.DAG(**DAG_KWARGS) as dag:
         task_id='get_deployments',
         doc='Download Google Sheet deployment info',
         python_callable=get_deployments_values,
+        execution_timeout=datetime.timedelta(minutes=1),
         op_kwargs=dict(
             # Arguments for GSheetsHook.get_values
             get_values_kwargs=dict(
@@ -147,6 +148,7 @@ with airflow.DAG(**DAG_KWARGS) as dag:
         task_id='update_deployments',
         doc='Insert deployment info into database',
         python_callable=insert_deployments,
+        execution_timeout=datetime.timedelta(minutes=1),
     )
 
     get_deployments >> update_deployments

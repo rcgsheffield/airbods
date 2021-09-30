@@ -26,6 +26,7 @@ with airflow.DAG(
         doc='Retrieve Datacake device info',
         http_conn_id='datacake',
         retry_exponential_backoff=True,
+        execution_timeout=datetime.timedelta(minutes=5),
         # Jinja escape characters for GraphQL syntax
         query=textwrap.dedent("""
         query {{ '{' }}
@@ -71,6 +72,7 @@ with airflow.DAG(
         task_id='merge_devices',
         doc='Insert device info into database',
         postgres_conn_id='database',
+        execution_timeout=datetime.timedelta(minutes=1),
         sql=textwrap.dedent("""
         INSERT INTO
             airbods.public.device (device_id, serial_number, verbose_name, object)
