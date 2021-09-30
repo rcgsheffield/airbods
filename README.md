@@ -173,6 +173,16 @@ If problems occur, check the logs and try the following steps:
 * Restart the services on the remote host (or perhaps reboot the entire remote system manually)
 * Use Ansible's verbose mode and other [debugging features](https://docs.ansible.com/ansible/latest/user_guide/playbooks_debugger.html)
 
+## Maintenance
+
+Routine maintenance must be performed on the server operating system and the various services that make up the system. There is a script called `maintenance.yaml` to automate some of this. This can be run as follows:
+
+```bash
+ansible-playbook --inventory hosts-prod.yaml --user $USER --ask-become-pass maintenance.yaml
+```
+
+This will clear out various aspects of the system but isn't a substitute for a proper maintenance routine.
+
 # Usage
 
 There are several ways to interact with and control each part of the system.

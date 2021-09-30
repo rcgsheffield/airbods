@@ -3,8 +3,17 @@
 
 # Plays
 - name: Upgrade packages
+  hosts: all
   become: yes
   tasks:
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_module.html
+    - name: Clean repositories
+      apt:
+        autoclean: yes
+        autoremove: yes
+    - name: Purge repositories
+      apt:
+        purge: yes
     - name: Upgrade packages
       apt:
         update_cache: yes
@@ -12,7 +21,8 @@
 
 # https://www.postgresql.org/docs/12/maintenance.html
 - name: PostgreSQL routine maintenance
-  remote_user: root
+  hosts: all
+  become: yes
   tasks:
     # https://www.postgresql.org/docs/12/backup.html
     # https://stribny.name/blog/ansible-postgresql-backups/
@@ -33,9 +43,10 @@
         autocommit: yes
 
 - name: Delete old log files
+  hosts: all
   become: yes
   tasks:
     - name: Remove old logs
       shell:
-        command: "journalctl --vacuum-size=1G"
+        cmd: "journalctl --vacuum-size=1G"
 ...
