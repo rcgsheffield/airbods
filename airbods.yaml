@@ -172,6 +172,11 @@
     - name: Enable RabbitMQ management console
       shell:
         cmd: "rabbitmq-plugins enable rabbitmq_management"
+    - name: Set RabbitMQ memory limit
+      # https://www.rabbitmq.com/memory.html
+      become_user: rabbitmq
+      shell:
+        cmd: "rabbitmqctl set_vm_memory_high_watermark 0.2"
     - name: Create RabbitMQ vhost
       rabbitmq_vhost:
         # This is required to fix the error "unable to connect to epmd (port

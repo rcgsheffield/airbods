@@ -611,6 +611,12 @@ ssh -L 5555:127.0.0.1:5555 $USER@airbods.shef.ac.uk
 See: RabbitMQ `rabbitmqctl` and [Management Command Line Tool](https://www.rabbitmq.com/management-cli.html). Examples:
 
 ```bash
+# Check it's installed
+sudo -u rabbitmq rabbitmqctl version
+
+# View node status
+sudo -u rabbitmq rabbitmqctl status
+
 # List users
 sudo -u rabbitmq rabbitmqctl list_users
 ```
