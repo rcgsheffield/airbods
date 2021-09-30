@@ -39,7 +39,7 @@
       become_user: postgres
       postgresql_query:
         db: airbods
-        query: VACUUM
+        query: "VACUUM"
         autocommit: yes
 
 - name: Delete old log files
