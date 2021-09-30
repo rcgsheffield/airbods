@@ -454,10 +454,21 @@
         dest: /etc/apache2/sites-available/airbods.conf
     - name: Enable Apache config
       file:
-        # Create symlink
-        path: /etc/apache2/sites-enabled/airbods.conf
+        # Create symbolic link
         state: link
+        path: /etc/apache2/sites-enabled/airbods.conf
         src: /etc/apache2/sites-available/airbods.conf
+      notify:
+        - Restart Apache
+    - name: Install thread config
+      copy:
+        src: mpm_event_low.conf
+        dest: /etc/apache2/mods-available/mpm_event_low.conf
+    - name: Enable thread config
+      file:
+        state: link
+        path: /etc/apache2/mods-enabled/mpm_event.conf
+        src: /etc/apache2/mods-available/mpm_event_low.conf
       notify:
         - Restart Apache
     - name: Create pgAdmin role

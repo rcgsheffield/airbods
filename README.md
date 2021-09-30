@@ -131,6 +131,8 @@ ansible --inventory hosts.yaml --user $USER -a "echo OK" all
 
 To run the deployment script, we need to use the deployment script which is defined as an Ansible "playbook" using the `ansible-playbook` command (see [ansible-playbook CLI docs](https://docs.ansible.com/ansible/latest/cli/ansible-playbook.html)).
 
+The `--inventory` option determines which hosts will be targeted, where `hosts.yaml` contains the development environment and `hosts-prod.yaml` points to the production environment.
+
 ```bash
 # Check that the Ansible Playbook command is working
 ansible-playbook --version
@@ -172,6 +174,10 @@ If problems occur, check the logs and try the following steps:
 * Ensure that the Ansible [notify handler](https://docs.ansible.com/ansible/latest/user_guide/playbooks_handlers.html) feature is enabled for any changes you may have have made.
 * Restart the services on the remote host (or perhaps reboot the entire remote system manually)
 * Use Ansible's verbose mode and other [debugging features](https://docs.ansible.com/ansible/latest/user_guide/playbooks_debugger.html)
+
+### Scaling
+
+Currently this deployment is designed to run a single machine, assuming that it's a small-scale instance. To scale this up to multiple machines, the hosts and deployment script will need to be adapted so that each machine performs a different role.
 
 ## Maintenance
 
@@ -382,7 +388,14 @@ The data pipelines are managed using [Apache Airflow](https://airflow.apache.org
 The is an Airflow GUI available via the [webserver](https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html) service which is available via SSH tunnel. To test that this is available using `curl` using the command below, the `--insecure` flag is used to prevent the certificate being checked (because the certificate used is not signed by a certificate authority (CA) and is self-signed.)
 
 ```bash
+# Create SSH tunnel
 ssh -L 4443:127.0.0.1:4443 $USER@airbods.shef.ac.uk
+```
+
+You can check it's worked by running this command from your local machine:
+
+```bash
+# Check the web page is accessible
 curl --insecure --head https://localhost:4443
 ```
 
@@ -562,6 +575,12 @@ Memory usage in MB:
 
 ```bash
 free --mega
+```
+
+Memory usage by process:
+
+```bash
+htop --sort-key PERCENT_MEM
 ```
 
 Storage space usage
