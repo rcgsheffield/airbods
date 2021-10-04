@@ -25,7 +25,6 @@ with airflow.DAG(
         task_id='all_devices',
         doc='Retrieve Datacake device info',
         http_conn_id='datacake',
-        retry_exponential_backoff=True,
         execution_timeout=datetime.timedelta(minutes=5),
         # Jinja escape characters for GraphQL syntax
         query=textwrap.dedent("""

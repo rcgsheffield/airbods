@@ -409,12 +409,20 @@ To run these commands, you must log in as the user `airflow` or prefix the comma
 sudo su - airflow --shell /bin/bash
 ```
 
+### List workflows
+
+To show the available workflows:
+
+```bash
+/opt/airflow/bin/airflow dags list
+```
+
 ### Clear
 
 The state of failed tasks may be cleared using the GUI under Browse > DAG Runs. You can also use the CLI with the [tasks clear](https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html#clear) command. This may be applied to an entire DAG run, or a subset of tasks, for a specified time range.
 
 ```bash
-sudo -u airflow /opt/airflow/bin/airflow tasks clear $DAG_ID --start-date "YYYY-MM-DD" --end-date "YYYY-MM-DD"
+sudo -u airflow /opt/airflow/bin/airflow tasks clear --start-date "YYYY-MM-DD" --end-date "YYYY-MM-DD" datacake
 ```
 
 ### Backfill
@@ -425,14 +433,6 @@ Using the Airflow CLI, use the [backfill command](https://airflow.apache.org/doc
 # /opt/airflow/bin/airflow dags backfill $DAG_ID -s $START_DATE -e $END_DATE -t <task_regex>
 sudo -u airflow /opt/airflow/bin/airflow dags backfill datacake --start-date "2021-04-15" --end-date "$(date -I)" --rerun-failed-tasks
 ```
-
-For historic data loads (with lots of tasks) you might want to run this long-running command in the background using the ampersand symbol `&`.
-
-```bash
-/opt/airflow/bin/airflow dags backfill datacake --start-date "2021-04-15" --end-date "$(date -I)" &
-```
-
-
 
 # Datacake
 
