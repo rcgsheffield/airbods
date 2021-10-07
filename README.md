@@ -141,7 +141,7 @@ ansible-playbook --version
 ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass airbods.yaml --check
 ```
 
-Install services:
+Install services (inside the development environment):
 
 ```bash
 ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass airbods.yaml
@@ -406,7 +406,14 @@ The DAG calendar view is useful to give an overview of the entire history of the
 To run these commands, you must log in as the user `airflow` or prefix the commands with `sudo -u airflow` to run them as that service user.
 
 ```bash
+# Log in as Airflow service user
 sudo su - airflow --shell /bin/bash
+
+# Add the Airflow binary directory to the shell context ($PATH)
+export PATH="/opt/airflow/bin:$PATH"
+
+# Check Airflow CLI is working as expected
+airflow version
 ```
 
 ### List workflows
@@ -414,7 +421,7 @@ sudo su - airflow --shell /bin/bash
 To show the available workflows:
 
 ```bash
-/opt/airflow/bin/airflow dags list
+airflow dags list
 ```
 
 ### Clear
@@ -422,7 +429,7 @@ To show the available workflows:
 The state of failed tasks may be cleared using the GUI under Browse > DAG Runs. You can also use the CLI with the [tasks clear](https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html#clear) command. This may be applied to an entire DAG run, or a subset of tasks, for a specified time range.
 
 ```bash
-sudo -u airflow /opt/airflow/bin/airflow tasks clear --start-date "YYYY-MM-DD" --end-date "YYYY-MM-DD" datacake
+airflow tasks clear --start-date "YYYY-MM-DD" --end-date "YYYY-MM-DD" datacake
 ```
 
 ### Backfill
@@ -430,8 +437,8 @@ sudo -u airflow /opt/airflow/bin/airflow tasks clear --start-date "YYYY-MM-DD" -
 Using the Airflow CLI, use the [backfill command](https://airflow.apache.org/docs/apache-airflow/stable/dag-run.html#backfill) (see [CLI backfill docs](https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html#backfill)) to run historic data pipelines:
 
 ```bash
-# /opt/airflow/bin/airflow dags backfill $DAG_ID -s $START_DATE -e $END_DATE -t <task_regex>
-sudo -u airflow /opt/airflow/bin/airflow dags backfill datacake --start-date "2021-04-15" --end-date "$(date -I)" --rerun-failed-tasks
+# airflow dags backfill $DAG_ID -s $START_DATE -e $END_DATE -t <task_regex>
+airflow dags backfill datacake --start-date "$START_DATE" --end-date "$(date -I)" --rerun-failed-tasks
 ```
 
 # Datacake
@@ -658,3 +665,6 @@ openssl x509 -noout -dates -in secrets/webserver.pem
 openssl x509 -noout -dates -in files/airbods_shef_ac_uk_cert.cer
 ```
 
+# Load balancer
+
+The ITS load balancer `airbods-lb.shef.ac.uk` points to https://airbods.shef.ac.uk:443.

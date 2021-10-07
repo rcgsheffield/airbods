@@ -383,10 +383,7 @@
         daemon_reload: true
       loop: "{{ service }}"
 
-# pgAdmin
-# pgAdmin runs behind an Apache HTTPD web server using WSGI in the file
-# /etc/apache2/conf-enabled/pgadmin4.conf at the root URL /pgadmin4.
-# curl --head https://airbods.shef.ac.uk/pgadmin4
+# pgAdmin (PostgreSQL database administration browser application)
 - name: Install pgAdmin
   # pgAdmin docs
   # https://www.pgadmin.org/docs/pgadmin4/latest
@@ -406,85 +403,71 @@
       apt:
         update_cache: yes
         name:
-          # Server mode (web app)
-          - pgadmin4-web
-    # This script will install Apache HTTPD web server
-    - name: Configure pgAdmin webserver
-      # Run in silent mode
-      # https://postgrespro.com/list/thread-id/2530260
+          # Server mode (web app) without Apache HTTPD
+          - pgadmin4
+          # https://docs.gunicorn.org/en/latest/install.html#ubuntu
+          - gunicorn
+    # We don't need Apache HTTPD
+    - name: Stop Apache2
+      systemd:
+        name: apache2
+        state: stopped
+    # Configure Gunicorn
+    - name: Create Gunicorn config directory
+      file:
+        state: directory
+        path: /etc/gunicorn.d/pgadmin4
+    - name: Grant gunicorn priviledged ports
       shell:
-        cmd: "/usr/pgadmin4/bin/setup-web.sh --yes"
-      environment:
-        PGADMIN_PLATFORM_TYPE: debian
-        PGADMIN_SETUP_PASSWORD: "{{ lookup('file', 'secrets/pgadmin.txt') }}"
-        PGADMIN_SETUP_EMAIL: j.heffer@sheffield.ac.uk
-    - name: Delete Apache2 Default Page
-      file:
-        state: absent
-        path: /var/www/html/index.html
-    - name: Blank Apache2 Default Page
-      file:
-        state: touch
-        path: /var/www/html/index.html
-    - name: Remove Apache2 default site
-      file:
-        path: /etc/apache2/sites-enabled/000-default.conf
-        state: absent
+        # Grant privileges to the Python interpreter used by Gunicorn
+        # sudo getcap /usr/bin/python3.8
+        cmd: "setcap cap_net_bind_service=+eip /usr/bin/python3.8"
+    - name: Install Gunicorn service
+      copy:
+        src: gunicorn/gunicorn.service
+        dest: /etc/systemd/system/gunicorn.service
       notify:
-        - Restart Apache
-    # HTTPS Configuration
-    # https://ubuntu.com/server/docs/web-servers-apache
+        - Restart Gunicorn
+    - name: Install Gunicorn configuration file
+      copy:
+        src: gunicorn/gunicorn.conf.py
+        dest: /etc/gunicorn.d/pgadmin4/gunicorn.conf.py
+      notify:
+        - Restart Gunicorn
+    # Encryption
+    - name: Make www-data dir
+      file:
+        state: directory
+        path: /home/www-data
+        owner: www-data
+        group: www-data
+        mode: 0700
     - name: Install SSL certificate
       copy:
         src: airbods_shef_ac_uk_cert.cer
-        dest: /etc/ssl/certs/airbods_shef_ac_uk_cert.cer
+        dest: /home/www-data/airbods_shef_ac_uk_cert.cer
     - name: Install SSL private key
       copy:
         src: secrets/airbods_shef_ac_uk.key
-        dest: /etc/ssl/private/airbods_shef_ac_uk.key
+        dest: /home/www-data/airbods_shef_ac_uk.key
         mode: 0600
-    - name: Enable mod_ssl module
-      shell: "a2enmod ssl"
-    - name: Configure Apache2 for HTTPS
-      shell: "a2ensite default-ssl"
-      notify:
-        - Restart Apache
-    - name: Disable default SSL config
-      file:
-        state: absent
-        path: /etc/apache2/sites-enabled/default-ssl.conf
-    - name: Install Apache config
-      copy:
-        src: airbods.conf
-        dest: /etc/apache2/sites-available/airbods.conf
-    - name: Enable Apache config
-      file:
-        # Create symbolic link
-        state: link
-        path: /etc/apache2/sites-enabled/airbods.conf
-        src: /etc/apache2/sites-available/airbods.conf
-      notify:
-        - Restart Apache
-    - name: Install thread config
-      copy:
-        src: mpm_event_low.conf
-        dest: /etc/apache2/mods-available/mpm_event_low.conf
-    - name: Enable thread config
-      file:
-        state: link
-        path: /etc/apache2/mods-enabled/mpm_event.conf
-        src: /etc/apache2/mods-available/mpm_event_low.conf
-      notify:
-        - Restart Apache
+        owner: www-data
+        group: ssl-cert
     - name: Create pgAdmin role
       become_user: postgres
       postgresql_user:
         user: pgadmin
         password: "{{ lookup('file', 'secrets/pgadmin.txt') }}"
         role_attr_flags: LOGIN,CREATEROLE
-  handlers:
-    - name: Restart Apache
+    - name: Start Gunicorn service
       systemd:
-        name: apache2
+        name: gunicorn
+        state: started
+        daemon_reload: yes
+  handlers:
+    - name: Restart Gunicorn
+      systemd:
+        name: gunicorn
         state: restarted
+        daemon_reload: yes
 ...
