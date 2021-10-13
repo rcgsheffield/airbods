@@ -8,8 +8,6 @@ The data are described in the [Metadata](#Metadata) section below.
 
 Code examples are contained the the [`examples`](examples) directory that can be used to retrieve data in various languages.
 
-Most of the examples shown below refer to the development environment deployed on the virtual machine at `airbodsdev.shef.ac.uk` because it is "safe" to access this. The real service will run on the production instance at `airbods.shef.ac.uk`.
-
 # Overview
 
 The system comprises two major parts:
@@ -411,7 +409,11 @@ sudo su - airflow --shell /bin/bash
 
 # Add the Airflow binary directory to the shell context ($PATH)
 export PATH="/opt/airflow/bin:$PATH"
+```
 
+To check it's working:
+
+```bash
 # Check Airflow CLI is working as expected
 airflow version
 ```
@@ -429,7 +431,14 @@ airflow dags list
 The state of failed tasks may be cleared using the GUI under Browse > DAG Runs. You can also use the CLI with the [tasks clear](https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html#clear) command. This may be applied to an entire DAG run, or a subset of tasks, for a specified time range.
 
 ```bash
-airflow tasks clear --start-date "YYYY-MM-DD" --end-date "YYYY-MM-DD" datacake
+# Clear *all* tasks
+#airflow tasks clear --start-date "YYYY-MM-DD" --end-date "YYYY-MM-DD" datacake
+```
+
+To only clear failed tasks:
+
+```bash
+airflow tasks clear --start-date "YYYY-MM-DD" --end-date "YYYY-MM-DD" --only-failed datacake
 ```
 
 ### Backfill
@@ -438,7 +447,7 @@ Using the Airflow CLI, use the [backfill command](https://airflow.apache.org/doc
 
 ```bash
 # airflow dags backfill $DAG_ID -s $START_DATE -e $END_DATE -t <task_regex>
-airflow dags backfill datacake --start-date "$START_DATE" --end-date "$(date -I)" --rerun-failed-tasks
+airflow dags backfill datacake --start-date "$START_DATE" --end-date "$(date -I)" --rerun-failed-tasks --run-backwards
 ```
 
 # Datacake
@@ -541,6 +550,12 @@ sudo systemctl status postgresql
 # List available log files (they're rotated regularly)
 sudo ls -l /var/log/postgresql
 sudo tail /var/log/postgresql/postgresql-12-main.log
+```
+
+pgAdmin logs:
+
+```bash
+sudo journalctl -u gunicorn --since "1 hour ago"
 ```
 
 RabbitMQ message broker service logs:
