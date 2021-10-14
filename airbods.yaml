@@ -251,7 +251,14 @@
       # "initdb is also idempotent, so this can be run as often as you
       # choose to, without needing to worry about the database changing."
       # https://stackoverflow.com/a/59560731
-      shell: "{{ airflow_bin_path }}/airflow db init"
+      shell:
+        cmd: "{{ airflow_bin_path }}/airflow db init"
+
+    - name: Update database schema
+      become_user: airflow
+      shell:
+        cmd: "{{ airflow_bin_path }}/airflow db upgrade"
+
     - name: Create Airflow admin user
       # Don't show password
       no_log: true

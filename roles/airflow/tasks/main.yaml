@@ -37,16 +37,17 @@
       - sasl2-bin
       - sqlite3
       - unixodbc
-      - python3-pip
+      # Install system Python
+      - python3.9
+      - python3.9-venv
 
-- name: Install virtualenv
-  pip:
-    name: virtualenv
-
+# https://pypi.org/project/apache-airflow/
 - name: Install Airflow packages
   pip:
-    name:
+    # Specify Airflow extra packages (the plugins required for various
+    # data connections.)
     # https://github.com/apache/airflow/tree/main/airflow/providers
+    name:
       - apache-airflow[celery,redis,postgres,google,http]==2.2.*
     virtualenv: /opt/airflow
 
@@ -91,8 +92,8 @@
     # Set file capabilities "Effective, Inheritable and Permitted" for the
     # Python interpreter used to run Airflow.
     # https://linux.die.net/man/8/setcap
-    # You can check this using `getcap /usr/bin/python3.8`
-    cmd: "setcap cap_net_bind_service=+eip /usr/bin/python3.8"
+    # You can check this using `getcap /usr/bin/{{ python }}`
+    cmd: "setcap cap_net_bind_service=+eip /usr/bin/{{ python }}"
 
 - name: Install Airflow content
   copy:

@@ -432,6 +432,9 @@ To check it's working:
 ```bash
 # Check Airflow CLI is working as expected
 airflow version
+
+# Check the metadata database connection
+airflow db check
 ```
 
 ### List workflows

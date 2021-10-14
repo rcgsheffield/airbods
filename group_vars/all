@@ -12,4 +12,6 @@ airflow_bin_path: /opt/airflow/bin
 airflow_home: /home/airflow/airflow
 
 secrets_dir: /home/airflow/secrets
+
+python: python3.9
 ...
