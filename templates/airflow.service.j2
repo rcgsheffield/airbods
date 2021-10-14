@@ -7,10 +7,12 @@
 # Running Airflow with systemd
 # https://airflow.apache.org/docs/apache-airflow/stable/howto/run-with-systemd.html
 
+# Examples:
+# https://github.com/apache/airflow/tree/main/scripts/systemd
+
 [Unit]
 Description=Apache Airflow {{ item }}
 After=network.target
-Wants=postgresql.service redis.service rabbitmq-server.service
 
 [Service]
 Environment="PATH=/usr/bin:{{ airflow_bin_path }}"
@@ -19,7 +21,7 @@ User=airflow
 Group=airflow
 Type=simple
 ExecStart={{ airflow_bin_path }}/airflow{% if item in ['worker', 'flower'] %} celery{% endif %} {{ item }}
-Restart=always
+Restart=on-failure
 RestartSec=60s
 
 [Install]

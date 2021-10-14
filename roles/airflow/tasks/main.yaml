@@ -1,0 +1,126 @@
+---
+# Common Apache Airflow installation tasks
+# https://airflow.apache.org/docs/apache-airflow/stable/installation.html
+
+# Service user
+- name: Create Airflow group
+  group:
+    name: airflow
+
+- name: Create airflow system user
+  user:
+    name: airflow
+    password: "{{ lookup('file', 'secrets/airflow.txt') | password_hash('sha512') }}"
+    system: yes
+    create_home: yes
+    group: airflow
+
+- name: Ensure Airflow dir exists
+  file:
+    state: directory
+    path: /home/airflow/airflow
+    owner: airflow
+    group: airflow
+    mode: 0750
+
+- name: Install Airflow prerequisites
+  apt:
+    name:
+      - freetds-bin
+      - krb5-user
+      - ldap-utils
+      - libsasl2-2
+      - libsasl2-modules
+      - libssl1.1
+      - locales
+      - lsb-release
+      - sasl2-bin
+      - sqlite3
+      - unixodbc
+      - python3-pip
+
+- name: Install virtualenv
+  pip:
+    name: virtualenv
+
+- name: Install Airflow packages
+  pip:
+    name:
+    # https://github.com/apache/airflow/tree/main/airflow/providers
+      - apache-airflow[celery,redis,postgres,google,http]==2.2.*
+    virtualenv: /opt/airflow
+
+- name: Install Airflow configuration
+  copy:
+    src: airflow.cfg
+    dest: /home/airflow/airflow/airflow.cfg
+    owner: airflow
+    group: airflow
+  notify:
+    - Restart Airflow services
+
+- name: Secure secrets dir
+  file:
+    path: "{{ secrets_dir }}"
+    state: directory
+    mode: 0500
+    owner: airflow
+    group: airflow
+
+- name: Install Airflow secrets
+  copy:
+    src: "{{ item }}"
+    dest: "{{ secrets_dir }}"
+    owner: airflow
+    group: airflow
+    mode: 0400
+  with_items:
+    # Airflow webserver encryption
+    # https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html#ssl
+    - secrets/webserver_key.pem
+    - secrets/webserver.pem
+    - secrets/sql_alchemy_conn.txt
+    - secrets/connections.json
+    - secrets/variables.json
+    - secrets/rabbitmq_url.txt
+
+# https://man7.org/linux/man-pages/man7/capabilities.7.html
+# https://superuser.com/a/892391
+- name: Allow Airflow to listen on privileged ports
+  shell:
+    # Set file capabilities "Effective, Inheritable and Permitted" for the
+    # Python interpreter used to run Airflow.
+    # https://linux.die.net/man/8/setcap
+    # You can check this using `getcap /usr/bin/python3.8`
+    cmd: "setcap cap_net_bind_service=+eip /usr/bin/python3.8"
+
+- name: Install Airflow content
+  copy:
+    src: "{{ item }}"
+    dest: "{{ airflow_home }}"
+    owner: airflow
+    group: airflow
+  loop:
+    - airflow/dags
+    - airflow/plugins
+    - airflow/tests
+    - airflow/variables.json
+
+- name: Import variables
+  become_user: airflow
+  shell: "{{ airflow_bin_path }}/airflow variables import {{ airflow_home }}/variables.json"
+
+- name: Install systemd services
+  template:
+    src: airflow.service.j2
+    dest: "/etc/systemd/system/airflow-{{ item }}.service"
+  loop: "{{ service }}"
+
+- name: Start Airflow services
+  systemd:
+    name: "airflow-{{ item }}"
+    state: started
+    daemon_reload: true
+  loop: "{{ service }}"
+
+...

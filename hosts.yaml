@@ -1,6 +1,16 @@
 ---
 # Ansible Inventory YAML document
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#inventory-basics-formats-hosts-and-groups
+
+# Development environment
 all:
   hosts:
     airbodsdev.shef.ac.uk:
+  children:
+    database:
+      airbodsdev.shef.ac.uk:
+    airflowscheduler:
+      airbodsdev.shef.ac.uk:
+    airflowworker:
+      airbodsdev.shef.ac.uk:
 ...

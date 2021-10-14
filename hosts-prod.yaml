@@ -1,6 +1,11 @@
 ---
 # Ansible Inventory YAML document
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#inventory-basics-formats-hosts-and-groups
+
+# Production environment
 all:
   hosts:
     airbods.shef.ac.uk:
+    airbods01.shef.ac.uk:
+    airbods02.shef.ac.uk:
 ...

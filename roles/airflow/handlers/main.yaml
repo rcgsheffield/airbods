@@ -1,0 +1,6 @@
+- name: Restart Airflow services
+  systemd:
+    name: "airflow-{{ item }}"
+    state: restarted
+    daemon_reload: true
+  loop: "{{ service }}"

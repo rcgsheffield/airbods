@@ -6,9 +6,13 @@ This document contains some descriptions of how the system is built and how to a
 
 The data are described in the [Metadata](#Metadata) section below.
 
-Code examples are contained the the [`examples`](examples) directory that can be used to retrieve data in various languages.
+Code examples are contained the the [`examples`](examples) directory that can be used to retrieve data in various languages.#
+
+This repository contains an Ansible project as described below.
 
 # Overview
+
+There is an overview of the system in the [architecture diagram](https://drive.google.com/file/d/1gzuFhhOR7JmASPKYVPKwvyLrUiUHpojA/view?usp=sharing).
 
 The system comprises two major parts:
 
@@ -16,7 +20,7 @@ The system comprises two major parts:
 * **Database:** The data are stored in a relational database management system implemented using [PostgreSQL](https://www.postgresql.org/).
   * A web-based [database administration interface](https://airbods.shef.ac.uk/pgadmin4) is available to manage this database.
 
-There is a simple overview of this in the [architecture diagram](https://drive.google.com/file/d/1gzuFhhOR7JmASPKYVPKwvyLrUiUHpojA/view?usp=sharing). The workflow orchestrator comprises the subcomponents inside the black dotted line. The user roles are represented by red person icons. The cloud services are shown as blue clouds. The services are represented as green rectangles. The databases are shown as yellow cylinders.
+The workflow orchestrator comprises the subcomponents inside the black dotted line. The user roles are represented by red person icons. The cloud services are shown as blue clouds. The services are represented as green rectangles. The databases are shown as yellow cylinders.
 
 There are three typical user roles:
 
@@ -80,14 +84,26 @@ The deployment script installs the necessary software subsystems on a remote mac
 
 ### Secure shell access
 
-The private key must be installed and configured on the target machine so that the control node may connect using secure shell (SSH). The `ida_rsa` file is that user's private key. The `authorized_keys` file is used to list the public keys that can automatically connect. These files would be stored in the directory `~/.ssh` for the user you use to connect.
+The private key must be installed and configured on the target machine so that the control node may connect using secure shell (SSH). See this tutorial: [How To Configure SSH Key-Based Authentication on a Linux Server](https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-authentication-on-a-linux-server). The `ssh-copy-id` tool is useful here to install your key information on a remote host.
 
 ```bash
-# Assuming the private key file is present, generate a public key
-ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
+ssh-copy-id $USER@airbods.shef.ac.uk
+ssh-copy-id $USER@airbods01.shef.ac.uk
+ssh-copy-id $USER@airbods02.shef.ac.uk
+```
 
-# Allow that private key to automatically log in by appending public key to authorized_keys list
-cat .ssh/id_rsa.pub >> .ssh/authorized_keys
+You can view the installed files like so:
+
+```bash
+ssh $USER@airbods.shef.ac.uk -i ~/.ssh/id_rsa "ls -la ~/.ssh/"
+```
+
+The `ida_rsa` file is that user's private key. The `authorized_keys` file is used to list the public keys that can automatically connect. These files would be stored in the directory `~/.ssh` for the user you use to connect.
+
+You can test the connection like so:
+
+```bash
+ssh $USER@airbods.shef.ac.uk -i ~/.ssh/id_rsa "echo OK"
 ```
 
 The tool `ssh-agent` is useful to save time by storing the password for encrypted private keys so you don't have to repeatedly type it in.
@@ -118,13 +134,13 @@ Check Ansible is working:
 ansible --version
 
 # View inventory
-ansible --inventory hosts.yaml --list-hosts all
+ansible --inventory hosts-prod.yaml --list-hosts all
 
-# Ping nodes
-ansible --inventory hosts.yaml --user $USER -m ping all
+# Ping all remote hosts
+ansible --inventory hosts-prod.yaml --user $USER all -m ping
 
-# Run a custom command
-ansible --inventory hosts.yaml --user $USER -a "echo OK" all
+# Run a custom command on each host
+ansible --inventory hosts-prod.yaml --user $USER -a "echo OK" all
 ```
 
 To run the deployment script, we need to use the deployment script which is defined as an Ansible "playbook" using the `ansible-playbook` command (see [ansible-playbook CLI docs](https://docs.ansible.com/ansible/latest/cli/ansible-playbook.html)).
@@ -387,7 +403,7 @@ The is an Airflow GUI available via the [webserver](https://airflow.apache.org/d
 
 ```bash
 # Create SSH tunnel
-ssh -L 4443:127.0.0.1:4443 $USER@airbods.shef.ac.uk
+ssh -L 4443:127.0.0.1:4443 $USER@airbods01.shef.ac.uk
 ```
 
 You can check it's worked by running this command from your local machine:
@@ -519,7 +535,7 @@ systemctl status redis
 
 # RabbitMQ
 sudo systemctl status rabbitmq-server
-udo -u rabbitmq rabbitmq-diagnostics status
+sudo -u rabbitmq rabbitmq-diagnostics status
 
 # View PostgreSQL cluster status
 systemctl status postgresql
