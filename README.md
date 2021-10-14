@@ -399,7 +399,7 @@ The data pipelines are managed using [Apache Airflow](https://airflow.apache.org
 
 ## Airflow web interface
 
-The is an Airflow GUI available via the [webserver](https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html) service which is available via SSH tunnel. To test that this is available using `curl` using the command below, the `--insecure` flag is used to prevent the certificate being checked (because the certificate used is not signed by a certificate authority (CA) and is self-signed.)
+The is an Airflow GUI available via the [webserver](https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html) service which is available via SSH tunnel. To test that this is available using `curl` using the command below, the `--insecure` flag is used to prevent the certificate being checked (because the certificate used is not signed by a certificate authority (CA) and is self-signed.) To view this interface in your web browser you'll need to skip any security warning messages about this certificate issue.
 
 ```bash
 # Create SSH tunnel
