@@ -455,14 +455,14 @@ airflow dags list
 The state of failed tasks may be cleared using the GUI under Browse > DAG Runs. You can also use the CLI with the [tasks clear](https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html#clear) command. This may be applied to an entire DAG run, or a subset of tasks, for a specified time range.
 
 ```bash
-# Clear *all* tasks
+# Clear *all* tasks within a time range
 #airflow tasks clear --start-date "YYYY-MM-DD" --end-date "YYYY-MM-DD" datacake
 ```
 
 To only clear failed tasks:
 
 ```bash
-airflow tasks clear --start-date "YYYY-MM-DD" --end-date "YYYY-MM-DD" --only-failed datacake
+airflow tasks clear datacake --only-failed
 ```
 
 ### Backfill

@@ -170,13 +170,12 @@
     - name: Install Redis package
       apt:
         name: redis
-    # Without this, Redis only accepts connections from the same machine
+    # Listen on localhost and network interface (see ifconfig)
     - name: Redis listen externally
       replace:
         path: /etc/redis/redis.conf
-        # Comment out the "bind" option
-        regexp: '^bind'
-        replace: '#bind'
+        regexp: '^bind.*'
+        replace: 'bind 127.0.0.1 172.30.16.201'
       notify:
         - Restart Redis
   handlers:
