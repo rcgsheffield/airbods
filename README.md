@@ -406,6 +406,8 @@ The is an Airflow GUI available via the [webserver](https://airflow.apache.org/d
 ssh -L 4443:127.0.0.1:4443 $USER@airbods01.shef.ac.uk
 ```
 
+This can be opened at this URL: https://localhost:4443
+
 You can check it's worked by running this command from your local machine:
 
 ```bash
@@ -417,7 +419,7 @@ The DAG calendar view is useful to give an overview of the entire history of the
 
 ## Airflow command line interface
 
-To run these commands, you must log in as the user `airflow` or prefix the commands with `sudo -u airflow` to run them as that service user.
+To run these commands, you must log in to a worker machine and run the following commands as the user `airflow` (that is, prefix the commands with `sudo -u airflow` to run them as that service user.)
 
 ```bash
 # Log in as Airflow service user
@@ -642,7 +644,7 @@ sudo ncdu /home
 You can look at the workers and tasks using [Flower](https://flower.readthedocs.io/en/latest/), a celery monitoring tool. (Also see [Airflow Flower docs](https://airflow.apache.org/docs/apache-airflow/stable/security/flower.html).) This can be accessed using an SSH tunnel for port 5555:
 
 ```bash
-ssh -L 5555:127.0.0.1:5555 $USER@airbods.shef.ac.uk
+ssh -L 5555:127.0.0.1:5555 $USER@airbods01.shef.ac.uk
 ```
 
  Then open http://localhost:5555 in a web browser on your computer.
