@@ -303,11 +303,11 @@ To connect to the SQL database, see code [examples](examples).
 
 ## pgAdmin web interface
 
-The pgAdmin tool is available at https://airbods.shef.ac.uk/pgadmin4. It is run by an Apache `httpd` server (the service name is `apache2`.)
+The pgAdmin tool is available at https://airbods.shef.ac.uk/. It is run by an Apache `httpd` server (the service name is `apache2`.)
 
 ### Configure server
 
-The connection to the database must be configured using the [Server Dialogue](https://airbods.shef.ac.uk/pgadmin4/help/help/server_dialog.html).
+The connection to the database must be configured using the [Server Dialogue](https://airbods.shef.ac.uk/help/help/server_dialog.html).
 
 1. If no servers are configured, click "Create Server"
 2. On the "General" tab, populate these fields:
@@ -435,6 +435,9 @@ To check it's working:
 # Check Airflow CLI is working as expected
 airflow version
 
+# Get environment information
+airflow info
+
 # Check the metadata database connection
 airflow db check
 ```
@@ -468,7 +471,7 @@ Using the Airflow CLI, use the [backfill command](https://airflow.apache.org/doc
 
 ```bash
 # airflow dags backfill $DAG_ID -s $START_DATE -e $END_DATE -t <task_regex>
-airflow dags backfill datacake --start-date "$START_DATE" --end-date "$(date -I)" --rerun-failed-tasks --run-backwards
+airflow dags backfill datacake --start-date "$START_DATE" --end-date "$(date -I)"
 ```
 
 # Datacake
@@ -669,7 +672,7 @@ sudo -u rabbitmq rabbitmqctl list_users
 SSH tunnel port 15672 on the remote machine 127.0.0.1:15672 using the `ssh` command or `putty`.
 
 ```bash
-ssh -L 15672:127.0.0.1:15672 $USER@airbods.shef.ac.uk
+ssh -L 15672:127.0.0.1:15672 $USER@airbods01.shef.ac.uk
 ```
 
 Then open http://localhost:15672 on your local machine.
