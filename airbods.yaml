@@ -170,6 +170,20 @@
     - name: Install Redis package
       apt:
         name: redis
+    # Without this, Redis only accepts connections from the same machine
+    - name: Redis listen externally
+      replace:
+        path: /etc/redis/redis.conf
+        # Comment out the "bind" option
+        regexp: '^bind'
+        replace: '#bind'
+      notify:
+        - Restart Redis
+  handlers:
+    - name: Restart Redis
+      service:
+        name: redis
+        state: restarted
 
 # Why You Should use Celery with RabbitMQ
 # https://www.section.io/engineering-education/why-you-should-use-celery-with-rabbitmq/
