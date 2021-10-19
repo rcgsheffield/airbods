@@ -299,7 +299,7 @@
       become_user: airflow
       shell:
         # https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html#pools
-        cmd: "{{ airflow_bin_path }}/airflow pools set datacake 4"
+        cmd: "{{ airflow_bin_path }}/airflow pools set datacake 8"
 
 - name: Install Airflow worker
   hosts: airbods02.shef.ac.uk
