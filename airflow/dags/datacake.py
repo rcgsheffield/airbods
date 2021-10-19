@@ -145,7 +145,8 @@ with airflow.DAG(**DAG_KWARGS) as dag:
         task_id='all_devices_history',
         http_conn_id='datacake',
         doc='Retrieve Datacake device historical raw data',
-        execution_timeout=datetime.timedelta(minutes=2),
+        execution_timeout=datetime.timedelta(minutes=5),
+        pool='datacake',
         # Jinja escape characters for GraphQL syntax
         query=textwrap.dedent("""
         query {{ '{' }}
