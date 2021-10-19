@@ -106,7 +106,12 @@ You can test the connection like so:
 ssh $USER@airbods.shef.ac.uk -i ~/.ssh/id_rsa "echo OK"
 ```
 
-The tool `ssh-agent` is useful to save time by storing the password for encrypted private keys so you don't have to repeatedly type it in.
+The tool `ssh-agent` is useful to save time by storing the password for encrypted private keys so you don't have to repeatedly type it in. See the Ansible [docs connection info](https://docs.ansible.com/ansible/latest/user_guide/connection_details.html).
+
+```bash
+ssh-agent bash
+ssh-add ~/.ssh/id_rsa
+```
 
 ### Superuser access
 
