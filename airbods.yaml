@@ -347,6 +347,7 @@
       service:
         name: apache2
         state: stopped
+        enabled: no
     # Configure Gunicorn
     - name: Create Gunicorn config directory
       file:
