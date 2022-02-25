@@ -2,8 +2,8 @@
 # https://bartsimons.me/gunicorn-as-a-systemd-service/
 
 [Unit]
-Description = gunicorn
-After = network.target
+Description=gunicorn
+After=network.target
 
 [Service]
 User=www-data
@@ -12,4 +12,4 @@ WorkingDirectory=/usr/pgadmin4/web
 ExecStart=/usr/bin/gunicorn pgAdmin4:app --pythonpath /usr/pgadmin4/venv/lib/python/site-packages --config /etc/gunicorn.d/pgadmin4/gunicorn.conf.py
 
 [Install]
-WantedBy = multi-user.target
+WantedBy=multi-user.target
