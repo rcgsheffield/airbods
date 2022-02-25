@@ -132,7 +132,7 @@ The variable `$USER` is used to specify which username to use to connect to the 
 USER=<sa_username>
 ```
 
-Check Ansible is working:
+Check Ansible is working. (You probably need to use `ssh-agent` as described above.)
 
 ```bash
 # View Ansible package version

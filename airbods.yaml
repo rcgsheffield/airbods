@@ -190,7 +190,7 @@
   hosts: airbods01.shef.ac.uk
   become: yes
   vars:
-    node: rabbit@airbods01
+    node: rabbit@localhost
   tasks:
     - name: Install RabbitMQ package
       apt:
@@ -213,6 +213,7 @@
     - name: Create RabbitMQ vhost
       rabbitmq_vhost:
         name: airflow
+        node: "{{ node }}"
     # This task seems to be problematic with older versions of Ansible
     # https://github.com/ansible-collections/community.rabbitmq/issues/52
     - name: Create RabbitMQ user
@@ -399,6 +400,7 @@
       service:
         name: gunicorn
         state: started
+        enable: yes
         daemon_reload: yes
   handlers:
     - name: Restart Gunicorn
