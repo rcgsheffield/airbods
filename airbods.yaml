@@ -400,7 +400,7 @@
       service:
         name: gunicorn
         state: started
-        enable: yes
+        enabled: yes
         daemon_reload: yes
   handlers:
     - name: Restart Gunicorn

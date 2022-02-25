@@ -308,7 +308,7 @@ To connect to the SQL database, see code [examples](examples).
 
 ## pgAdmin web interface
 
-The pgAdmin tool is available at https://airbods.shef.ac.uk/. It is run by an Apache `httpd` server (the service name is `apache2`.)
+The [pgAdmin](https://www.pgadmin.org/) tool is available by opening [airbods.shef.ac.uk](https://airbods.shef.ac.uk/) using a web browser.
 
 ### Configure server
 
