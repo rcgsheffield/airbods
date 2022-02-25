@@ -4,12 +4,17 @@
 # Available settings:
 # https://docs.gunicorn.org/en/stable/settings.html
 
-# Debugging
-# loglevel = 'debug'
+import os
 
-# SSL
-keyfile = '/home/www-data/airbods_shef_ac_uk.key'
-certfile = '/home/www-data/airbods_shef_ac_uk_cert.cer'
+# Debugging
+loglevel = os.getenv('LOGLEVEL', 'warning')
+
+# SSL encryption
+keyfile = os.getenv('KEYFILE')
+certfile = os.getenv('CERTFILE')
 
 # Server socket
-bind = ['0.0.0.0:443']
+bind = list(os.getenv('BIND', '127.0.0.1:8000').split())
+
+workers = int(os.getenv('WORKERS', 1))
+threads = int(os.getenv('THREADS', 1))

@@ -371,6 +371,56 @@
         dest: /etc/gunicorn.d/pgadmin4/gunicorn.conf.py
       notify:
         - Restart Gunicorn
+    - name: Install Gunicorn environment variables
+      copy:
+        src: gunicorn/gunicorn.env
+        dest: /etc/gunicorn.d/pgadmin4/gunicorn.env
+    - name: Create pgAdmin role
+      become_user: postgres
+      postgresql_user:
+        user: pgadmin
+        password: "{{ lookup('file', 'secrets/pgadmin.txt') }}"
+        role_attr_flags: LOGIN,CREATEROLE
+    - name: Start Gunicorn service
+      service:
+        name: gunicorn
+        state: started
+        enabled: yes
+        daemon_reload: yes
+  handlers:
+    - name: Restart Gunicorn
+      service:
+        name: gunicorn
+        state: restarted
+        daemon_reload: yes
+
+# NGINX is used as a reverse proxy to handle requests to the PgAdmin app
+# https://www.pgadmin.org/docs/pgadmin4/6.5/server_deployment.html#nginx-configuration-with-gunicorn
+# https://docs.gunicorn.org/en/stable/deploy.html
+- name: Install NGINX
+  # pgAdmin docs
+  # https://www.pgadmin.org/docs/pgadmin4/latest
+  hosts: airbods.shef.ac.uk
+  become: yes
+  tasks:
+    - name: Install NGINX
+      apt:
+        name: nginx
+    - name: Install NGINX site configuration
+      copy:
+        src: gunicorn/gunicorn.conf
+        dest: /etc/nginx/sites-available/gunicorn.conf
+      notify:
+        - Restart NGINX
+    - name: Enable NGINX site
+      file:
+        state: link
+        src: /etc/nginx/sites-available/gunicorn.conf
+        path: /etc/nginx/sites-enabled/gunicorn.conf
+    - name: Disable default site
+      file:
+        state: absent
+        path: /etc/nginx/sites-enabled/default
     # Encryption
     - name: Make www-data dir
       file:
@@ -390,20 +440,8 @@
         mode: 0600
         owner: www-data
         group: ssl-cert
-    - name: Create pgAdmin role
-      become_user: postgres
-      postgresql_user:
-        user: pgadmin
-        password: "{{ lookup('file', 'secrets/pgadmin.txt') }}"
-        role_attr_flags: LOGIN,CREATEROLE
-    - name: Start Gunicorn service
-      service:
-        name: gunicorn
-        state: started
-        enabled: yes
-        daemon_reload: yes
   handlers:
-    - name: Restart Gunicorn
+    - name: Restart NGINX
       service:
         name: gunicorn
         state: restarted

@@ -56,9 +56,9 @@ The system comprises multiple subsystems as described above that are installed u
 
 ## Ansible
 
-Automated deployment is implemented using Ansible. See their docs: [Executing playbooks for troubleshooting](https://docs.ansible.com/ansible/latest/user_guide/playbooks_startnstep.html). Most of the service configuration files are in the `files` directory (Ansible will automatically search this directory for files to upload.) Variables are defined in the  `group_vars/all` YAML file.
+Automated deployment is implemented using [Ansible](https://docs.ansible.com/), which defines a workflow comprising a series of tasks that install software and configure services. This workflow is executed on one or more remote machines. See their docs: [Executing playbooks for troubleshooting](https://docs.ansible.com/ansible/latest/user_guide/playbooks_startnstep.html). Most of the service configuration files are in the `files` directory (Ansible will automatically search this directory for files to upload.) Variables are defined in the  `group_vars/all` YAML file.
 
-You may need to [install Ansible in a Python virtual environment](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#id18). To use the tool you'll need to activate the virtual environment with a command similar to the one below, assuming the environment was created in the directory `~/ansible`:
+You may need to [install Ansible in a Python virtual environment](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#id18) if you need to use a more up-to-date version of the software, which is written in Python. To use the tool you'll need to activate the virtual environment with a command similar to the one below, assuming the environment was created in the directory `~/ansible`:
 
 ```bash
 source ~/ansible/bin/activate
