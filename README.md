@@ -12,7 +12,7 @@ This repository contains an Ansible project as described below.
 
 # Overview
 
-There is an overview of the system in the [architecture diagram](https://drive.google.com/file/d/1gzuFhhOR7JmASPKYVPKwvyLrUiUHpojA/view?usp=sharing).
+There is an **overview of the system in the [architecture diagram](https://drive.google.com/file/d/1gzuFhhOR7JmASPKYVPKwvyLrUiUHpojA/view?usp=sharing)**.
 
 The system comprises two major parts:
 
@@ -132,6 +132,13 @@ The variable `$USER` is used to specify which username to use to connect to the 
 USER=<sa_username>
 ```
 
+Use the shell variable `$INVENTORY` to select the target environment:
+
+```bash
+INVENTORY=hosts-dev.yaml
+#INVENTORY=hosts-prod.yaml
+```
+
 Check Ansible is working. (You probably need to use `ssh-agent` as described above.)
 
 ```bash
@@ -139,48 +146,37 @@ Check Ansible is working. (You probably need to use `ssh-agent` as described abo
 ansible --version
 
 # View inventory
-ansible --inventory hosts-prod.yaml --list-hosts all
+ansible --inventory $INVENTORY --list-hosts all
 
 # Ping all remote hosts
-ansible --inventory hosts-prod.yaml --user $USER all -m ping
+ansible --inventory $INVENTORY --user $USER all -m ping
 
 # Run a custom command on each host
-ansible --inventory hosts-prod.yaml --user $USER -a "echo OK" all
+ansible --inventory $INVENTORY --user $USER -a "echo OK" all
 ```
 
 To run the deployment script, we need to use the deployment script which is defined as an Ansible "playbook" using the `ansible-playbook` command (see [ansible-playbook CLI docs](https://docs.ansible.com/ansible/latest/cli/ansible-playbook.html)).
 
-The `--inventory` option determines which hosts will be targeted, where `hosts.yaml` contains the development environment and `hosts-prod.yaml` points to the production environment.
+The `--inventory` option determines which [inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html) of hosts will be targeted, where `hosts.yaml` contains the development environment and `hosts-prod.yaml` points to the production environment. You need to use a different inventory file which will point the deployment script to a different machine using the `--inventory` argument of the `ansible-playbook` command.
 
 ```bash
 # Check that the Ansible Playbook command is working
 ansible-playbook --version
 
 # Check a playbook
-ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass airbods.yaml --check
+ansible-playbook --inventory $INVENTORY --user $USER --ask-become-pass airbods.yaml --check
 ```
 
-Install services (inside the development environment):
+Install services (inside the selected environment):
 
 ```bash
-ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass airbods.yaml
+ansible-playbook --inventory $INVENTORY --user $USER --ask-become-pass airbods.yaml
 ```
 
 Run automated tests:
 
 ```bash
-ansible-playbook --inventory hosts.yaml --user $USER --ask-become-pass test.yaml
-```
-
-### Production
-
-To deploy the system to a production instance, the following changes are required. There is more information about managing separate environments using Ansible on this Digital Ocean tutorial: "[How to Manage Multistage Environments with Ansible](https://www.digitalocean.com/community/tutorials/how-to-manage-multistage-environments-with-ansible#ansible-recommended-strategy-using-groups-and-multiple-inventories)".
-
-You need to use a different inventory file which will point the deployment script to a different machine using the `--inventory` argument of the `ansible-playbook` command.
-
-```bash
-# Run the deployment script in the production environment
-ansible-playbook --inventory hosts-prod.yaml --user $USER --ask-become-pass airbods.yaml
+ansible-playbook --inventory $INVENTORY --user $USER --ask-become-pass test.yaml
 ```
 
 ### Troubleshooting

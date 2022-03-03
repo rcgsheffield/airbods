@@ -8,9 +8,12 @@ all:
     airbodsdev.shef.ac.uk:
   children:
     database:
-      airbodsdev.shef.ac.uk:
-    airflowscheduler:
-      airbodsdev.shef.ac.uk:
-    airflowworker:
-      airbodsdev.shef.ac.uk:
+      hosts:
+        airbodsdev.shef.ac.uk:
+    scheduler:
+      hosts:
+        airbodsdev.shef.ac.uk:
+    workers:
+      hosts:
+        airbodsdev.shef.ac.uk:
 ...

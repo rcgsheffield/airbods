@@ -8,4 +8,14 @@ all:
     airbods.shef.ac.uk:
     airbods01.shef.ac.uk:
     airbods02.shef.ac.uk:
+  children:
+    database:
+      hosts:
+        airbods.shef.ac.uk:
+    scheduler:
+      hosts:
+        airbods01.shef.ac.uk:
+    workers:
+      hosts:
+        airbods02.shef.ac.uk:
 ...
