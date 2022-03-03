@@ -402,6 +402,8 @@
   # https://www.pgadmin.org/docs/pgadmin4/latest
   hosts: database
   become: yes
+  vars:
+    site_path: /etc/nginx/sites-available/gunicorn.conf
   tasks:
     - name: Install NGINX
       apt:
@@ -409,13 +411,13 @@
     - name: Install NGINX site configuration
       copy:
         src: gunicorn/gunicorn.conf
-        dest: /etc/nginx/sites-available/gunicorn.conf
+        dest: "{{ site_path }}"
       notify:
         - Restart NGINX
     - name: Enable NGINX site
       file:
         state: link
-        src: /etc/nginx/sites-available/gunicorn.conf
+        src: "{{ site_path }}"
         path: /etc/nginx/sites-enabled/gunicorn.conf
     - name: Disable default site
       file:
