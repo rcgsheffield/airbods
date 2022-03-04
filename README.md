@@ -12,6 +12,8 @@ This repository contains an Ansible project as described below.
 
 # Overview
 
+## Architecture
+
 There is an **overview of the system in the [architecture diagram](https://drive.google.com/file/d/1gzuFhhOR7JmASPKYVPKwvyLrUiUHpojA/view?usp=sharing)**.
 
 The system comprises two major parts:
@@ -208,9 +210,9 @@ This will clear out various aspects of the system but isn't a substitute for a p
 
 There are several ways to interact with and control each part of the system.
 
-## SQL database
+## Data access
 
-There are several ways to connect to the database, either using software packages or programming languages. See the [examples](examples) directory for a list of available tools.
+The research data are contained in a Structured Query Language (SQL) database. There are several ways to connect to this SQL database, either using software packages or programming languages. See the [examples](examples) directory for a list of available tools.
 
 The [connection string](https://www.postgresql.org/docs/12/libpq-connect.html#LIBPQ-CONNSTRING) is as follows:
 
@@ -287,9 +289,7 @@ Run unit tests:
 python -m unittest --failfast
 ```
 
-# Data access
 
-Code examples are contained the the [`examples`](examples) directory.
 
 # Database administration
 
@@ -400,14 +400,14 @@ The data pipelines are managed using [Apache Airflow](https://airflow.apache.org
 
 ## Airflow web interface
 
-The is an Airflow GUI available via the [webserver](https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html) service which is available via SSH tunnel. To test that this is available using `curl` using the command below, the `--insecure` flag is used to prevent the certificate being checked (because the certificate used is not signed by a certificate authority (CA) and is self-signed.) To view this interface in your web browser you'll need to skip any security warning messages about this certificate issue.
+The is an Airflow GUI available via the [webserver](https://airflow.apache.org/docs/apache-airflow/stable/security/webserver.html) service which is available via SSH tunnel. To test that this is available using `curl` using the command below, the `--insecure` flag is used to prevent the certificate being checked (because the certificate used is not signed by a certificate authority (CA) and is self-signed.)
 
 ```bash
 # Create SSH tunnel
 ssh -L 4443:127.0.0.1:4443 $USER@airbods01.shef.ac.uk
 ```
 
-This can be opened at this URL: https://localhost:4443
+This can be opened at this URL: https://localhost:4443. To view this interface in your web browser you'll need to skip any security warning messages about this certificate issue.
 
 You can check it's worked by running this command from your local machine:
 
