@@ -214,7 +214,7 @@ There are several ways to interact with and control each part of the system.
 
 The research data are contained in a Structured Query Language (SQL) database. There are several ways to connect to this SQL database, either using software packages or programming languages. See the [examples](examples) directory for a list of available tools.
 
-The [connection string](https://www.postgresql.org/docs/12/libpq-connect.html#LIBPQ-CONNSTRING) is as follows:
+To connect to the database machine, use the [connection string](https://www.postgresql.org/docs/12/libpq-connect.html#LIBPQ-CONNSTRING) is as follows:
 
 ```uri
 postgresql://$USERNAME:$PASSWORD@airbods.shef.ac.uk/airbods
@@ -222,7 +222,7 @@ postgresql://$USERNAME:$PASSWORD@airbods.shef.ac.uk/airbods
 
 ### PostgreSQL interactive terminal
 
-You can connect to the database with [psql](https://www.postgresql.org/docs/12/app-psql.html) as follows:
+You can connect to the database from your local computer with [psql](https://www.postgresql.org/docs/12/app-psql.html) as follows:
 
 ```bash
 psql --host=airbods.shef.ac.uk --dbname=airbods --username=$USERNAME
@@ -240,11 +240,12 @@ psql --host=airbods.shef.ac.uk --dbname=airbods --username=$USERNAME --command "
 
 See PostgreSQL docs [Chapter 25. Backup and Restore](https://www.postgresql.org/docs/12/backup.html).
 
+First, log into the database machine as an administrator, and run the following commands:
+
 ```bash
 # Log in with database service account
 sudo su - postgres --shell /bin/bash
-
-pg_dump -h airbods.shef.ac.uk airbods > airbods.sql
+pg_dump airbods > /tmp/airbods.sql
 ```
 
 ## Airflow CLI
