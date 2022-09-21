@@ -240,12 +240,12 @@ psql --host=airbods.shef.ac.uk --dbname=airbods --username=$USERNAME --command "
 
 See PostgreSQL docs [Chapter 25. Backup and Restore](https://www.postgresql.org/docs/12/backup.html).
 
-First, log into the database machine as an administrator, and run the following commands:
+First, log into the database machine as an administrator, and run the following  [pg_dump](https://www.postgresql.org/docs/12/app-pgdump.html) command as the `postgres` user:
 
 ```bash
 # Log in with database service account
 sudo su - postgres --shell /bin/bash
-pg_dump airbods > /tmp/airbods.sql
+pg_dump airbods --verbose --file "/tmp/airbods-`date -I`.sql"
 ```
 
 ## Airflow CLI
