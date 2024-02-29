@@ -1,0 +1,17 @@
+{
+  "datacake_workspace_id": "db078783-1715-4318-9452-3a78439ca88b",
+  "datacake_fields": [
+    "CO2",
+    "TEMPERATURE",
+    "AIR_QUALITY",
+    "HUMIDITY",
+    "LORAWAN_SNR",
+    "LORAWAN_DATARATE",
+    "LORAWAN_RSSI"
+  ],
+  "datacake_raw_dir": "/mnt/my-data-dir/raw_data",
+  "deployments": {
+    "sheet_id": "************************",
+    "tab": "My sheet name"
+  }
+}
