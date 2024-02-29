@@ -5,17 +5,15 @@
 # Production environment
 all:
   hosts:
-    airbods.shef.ac.uk:
-    airbods01.shef.ac.uk:
-    airbods02.shef.ac.uk:
+    my-domain.com:
   children:
     database:
       hosts:
-        airbods.shef.ac.uk:
+        my-domain.com:
     scheduler:
       hosts:
-        airbods01.shef.ac.uk:
+        my-domain.com:
     workers:
       hosts:
-        airbods02.shef.ac.uk:
+        my-domain.com:
 ...
