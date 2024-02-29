@@ -1,6 +1,6 @@
-# Airbods
+# AIRBODS data pipeline
 
-Data pipelines and data storage for Airbods air measurement experiments. The primary data pipeline downloads all the raw data available on a single Datacake "workspace" (specified by its unique identifier) and copies those data onto a database. It then transforms that data to make a "clean" data set available for research use.
+Data pipelines and data storage for [AIRBODS](https://airbods.org.uk/) air measurement experiments. The primary data pipeline downloads all the raw data available on a single Datacake "workspace" (specified by its unique identifier) and copies those data onto a database. It then transforms that data to make a "clean" data set available for research use.
 
 This document contains some descriptions of how the system is built and how to administer and maintain it.
 
@@ -9,6 +9,8 @@ The data are described in the [Metadata](#Metadata) section below.
 Code examples are contained the the [`examples`](examples) directory that can be used to retrieve data in various languages.#
 
 This repository contains an Ansible project as described below.
+
+For an overview, see this blog post "[Supporting airborne infection research with data engineering](https://casestudiesrcg.blogspot.com/2021/11/supporting-airborne-infection-research.html)" by the Research & Innovation IT team in IT Services at the University of Sheffield.
 
 # Overview
 
