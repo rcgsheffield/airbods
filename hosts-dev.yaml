@@ -5,15 +5,15 @@
 # Development environment
 all:
   hosts:
-    airbodsdev.shef.ac.uk:
+    dev.my-domain.com:
   children:
     database:
       hosts:
-        airbodsdev.shef.ac.uk:
+        dev.my-domain.com:
     scheduler:
       hosts:
-        airbodsdev.shef.ac.uk:
+        dev.my-domain.com:
     workers:
       hosts:
-        airbodsdev.shef.ac.uk:
+        dev.my-domain.com:
 ...
