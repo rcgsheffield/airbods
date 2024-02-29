@@ -15,6 +15,6 @@ To install the PostgreSQL ODBC driver for Windows:
    2. Select "PostgreSQL Unicode" and click "Finish"
    3. Enter the following values:
       1. Database: `airbods`
-      2. Server: `airbods.shef.ac.uk`
+      2. Server: `airbods.my-domain.com`
       3. Username: `<your user name>`
       4. Password: `<your password>`

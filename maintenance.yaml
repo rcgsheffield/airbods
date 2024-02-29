@@ -21,7 +21,7 @@
 
 # https://www.postgresql.org/docs/12/maintenance.html
 - name: PostgreSQL routine maintenance
-  hosts: airbods.shef.ac.uk
+  hosts: airbods.my-domain.com
   become: yes
   tasks:
     # https://www.postgresql.org/docs/12/backup.html

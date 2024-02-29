@@ -20,7 +20,7 @@ The system comprises two major parts:
 
 * **Workflow Orchestrator:** The data pipelines are implemented using a workflow orchestrator called [Apache Airflow](https://airflow.apache.org/).
 * **Database:** The data are stored in a relational database management system implemented using [PostgreSQL](https://www.postgresql.org/).
-  * A web-based [database administration interface](https://airbods.shef.ac.uk/pgadmin4) is available to manage this database.
+  * A web-based [database administration interface](https://airbods.my-domain.com/pgadmin4) is available to manage this database.
 
 The workflow orchestrator comprises the subcomponents inside the black dotted line. The user roles are represented by red person icons. The cloud services are shown as blue clouds. The services are represented as green rectangles. The databases are shown as yellow cylinders.
 
@@ -89,15 +89,15 @@ The deployment script installs the necessary software subsystems on a remote mac
 The private key must be installed and configured on the target machine so that the control node may connect using secure shell (SSH). See this tutorial: [How To Configure SSH Key-Based Authentication on a Linux Server](https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-authentication-on-a-linux-server). The `ssh-copy-id` tool is useful here to install your key information on a remote host.
 
 ```bash
-ssh-copy-id $USER@airbods.shef.ac.uk
-ssh-copy-id $USER@airbods01.shef.ac.uk
-ssh-copy-id $USER@airbods02.shef.ac.uk
+ssh-copy-id $USER@airbods.my-domain.com
+ssh-copy-id $USER@airbods01.my-domain.com
+ssh-copy-id $USER@airbods02.my-domain.com
 ```
 
 You can view the installed files like so:
 
 ```bash
-ssh $USER@airbods.shef.ac.uk -i ~/.ssh/id_rsa "ls -la ~/.ssh/"
+ssh $USER@airbods.my-domain.com -i ~/.ssh/id_rsa "ls -la ~/.ssh/"
 ```
 
 The `ida_rsa` file is that user's private key. The `authorized_keys` file is used to list the public keys that can automatically connect. These files would be stored in the directory `~/.ssh` for the user you use to connect.
@@ -105,7 +105,7 @@ The `ida_rsa` file is that user's private key. The `authorized_keys` file is use
 You can test the connection like so:
 
 ```bash
-ssh $USER@airbods.shef.ac.uk -i ~/.ssh/id_rsa "echo OK"
+ssh $USER@airbods.my-domain.com -i ~/.ssh/id_rsa "echo OK"
 ```
 
 The tool `ssh-agent` is useful to save time by storing the password for encrypted private keys so you don't have to repeatedly type it in. See the Ansible [docs connection info](https://docs.ansible.com/ansible/latest/user_guide/connection_details.html).
@@ -217,7 +217,7 @@ The research data are contained in a Structured Query Language (SQL) database. T
 To connect to the database machine, use the [connection string](https://www.postgresql.org/docs/12/libpq-connect.html#LIBPQ-CONNSTRING) is as follows:
 
 ```uri
-postgresql://$USERNAME:$PASSWORD@airbods.shef.ac.uk/airbods
+postgresql://$USERNAME:$PASSWORD@airbods.my-domain.com/airbods
 ```
 
 ### PostgreSQL interactive terminal
@@ -225,7 +225,7 @@ postgresql://$USERNAME:$PASSWORD@airbods.shef.ac.uk/airbods
 You can connect to the database from your local computer with [psql](https://www.postgresql.org/docs/12/app-psql.html) as follows:
 
 ```bash
-psql --host=airbods.shef.ac.uk --dbname=airbods --username=$USERNAME
+psql --host=airbods.my-domain.com --dbname=airbods --username=$USERNAME
 ```
 
 You may need to change the username to something else. You can enter the password manually or use a [pgpass](https://www.postgresql.org/docs/12/libpq-pgpass.html) file.
@@ -233,7 +233,7 @@ You may need to change the username to something else. You can enter the passwor
 You can run a command by using the shell or as follows:
 
 ```bash
-psql --host=airbods.shef.ac.uk --dbname=airbods --username=$USERNAME --command "SELECT now();"
+psql --host=airbods.my-domain.com --dbname=airbods --username=$USERNAME --command "SELECT now();"
 ```
 
 ### Backup
@@ -305,11 +305,11 @@ To connect to the SQL database, see code [examples](examples).
 
 ## pgAdmin web interface
 
-The [pgAdmin](https://www.pgadmin.org/) tool is available by opening [airbods.shef.ac.uk](https://airbods.shef.ac.uk/) using a web browser.
+The [pgAdmin](https://www.pgadmin.org/) tool is available by opening [airbods.my-domain.com](https://airbods.my-domain.com/) using a web browser.
 
 ### Configure server
 
-The connection to the database must be configured using the [Server Dialogue](https://airbods.shef.ac.uk/help/help/server_dialog.html).
+The connection to the database must be configured using the [Server Dialogue](https://airbods.my-domain.com/help/help/server_dialog.html).
 
 1. If no servers are configured, click "Create Server"
 2. On the "General" tab, populate these fields:
@@ -405,7 +405,7 @@ The is an Airflow GUI available via the [webserver](https://airflow.apache.org/d
 
 ```bash
 # Create SSH tunnel
-ssh -L 4443:127.0.0.1:4443 $USER@airbods01.shef.ac.uk
+ssh -L 4443:127.0.0.1:4443 $USER@airbods01.my-domain.com
 ```
 
 This can be opened at this URL: https://localhost:4443. To view this interface in your web browser you'll need to skip any security warning messages about this certificate issue.
@@ -649,7 +649,7 @@ sudo ncdu /home
 You can look at the workers and tasks using [Flower](https://flower.readthedocs.io/en/latest/), a celery monitoring tool. (Also see [Airflow Flower docs](https://airflow.apache.org/docs/apache-airflow/stable/security/flower.html).) This can be accessed using an SSH tunnel for port 5555:
 
 ```bash
-ssh -L 5555:127.0.0.1:5555 $USER@airbods01.shef.ac.uk
+ssh -L 5555:127.0.0.1:5555 $USER@airbods01.my-domain.com
 ```
 
  Then open http://localhost:5555 in a web browser on your computer.
@@ -674,7 +674,7 @@ sudo -u rabbitmq rabbitmqctl list_users
 SSH tunnel port 15672 on the remote machine 127.0.0.1:15672 using the `ssh` command or `putty`.
 
 ```bash
-ssh -L 15672:127.0.0.1:15672 $USER@airbods01.shef.ac.uk
+ssh -L 15672:127.0.0.1:15672 $USER@airbods01.my-domain.com
 ```
 
 Then open http://localhost:15672 on your local machine.
@@ -694,18 +694,18 @@ sudo systemctl restart rabbitmq-server
 Check that private key fingerprint matches that of the certificate:
 
 ```bash
-openssl rsa -noout -modulus -in secrets/airbods_shef_ac_uk.key
-openssl req -noout -modulus -in secrets/airbods_shef_ac_uk.csr
-openssl x509 -noout -modulus -in files/airbods_shef_ac_uk_cert.cer
+openssl rsa -noout -modulus -in secrets/airbods_my_domain_com.key
+openssl req -noout -modulus -in secrets/airbods_my_domain_com.csr
+openssl x509 -noout -modulus -in files/airbods_my_domain_com_cert.cer
 ```
 
 Check certificate expiration dates:
 
 ```bash
 openssl x509 -noout -dates -in secrets/webserver.pem
-openssl x509 -noout -dates -in files/airbods_shef_ac_uk_cert.cer
+openssl x509 -noout -dates -in files/airbods_my_domain_com_cert.cer
 ```
 
 # Load balancer
 
-The ITS load balancer `airbods-lb.shef.ac.uk` points to https://airbods.shef.ac.uk:443.
+The ITS load balancer `airbods-lb.my-domain.com` points to https://airbods.my-domain.com:443.

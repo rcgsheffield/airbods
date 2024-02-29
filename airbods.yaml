@@ -67,7 +67,7 @@
     # postgresql.conf ssl_cert_file
     - name: Install certificate
       copy:
-        src: airbods_shef_ac_uk_cert.cer
+        src: airbods_my_domain_com_cert.cer
         dest: /var/lib/postgresql/12/main/server.crt
         owner: postgres
         group: postgres
@@ -75,7 +75,7 @@
     # postgresql.conf ssl_key_file
     - name: Install private key
       copy:
-        src: secrets/airbods_shef_ac_uk.key
+        src: secrets/airbods_my_domain_com.key
         dest: /var/lib/postgresql/12/main/server.key
         owner: postgres
         group: postgres
@@ -293,7 +293,7 @@
           - "--role"
           - "Admin"
           - "--email"
-          - "airbods@sheffield.ac.uk"
+          - "airbods@my-domain.com"
 
     - name: Create Datacake pool
       # https://airflow.apache.org/docs/apache-airflow/stable/concepts/pools.html
@@ -433,12 +433,12 @@
         mode: 0700
     - name: Install SSL certificate
       copy:
-        src: airbods_shef_ac_uk_cert.cer
-        dest: /home/www-data/airbods_shef_ac_uk_cert.cer
+        src: airbods_my_domain_com_cert.cer
+        dest: /home/www-data/airbods_my_domain_com_cert.cer
     - name: Install SSL private key
       copy:
-        src: secrets/airbods_shef_ac_uk.key
-        dest: /home/www-data/airbods_shef_ac_uk.key
+        src: secrets/airbods_my_domain_com.key
+        dest: /home/www-data/airbods_my_domain_com.key
         mode: 0600
         owner: www-data
         group: ssl-cert
