@@ -18,6 +18,24 @@ For an overview, see this blog post "[Supporting airborne infection research wit
 
 There is an **overview of the system in the [architecture diagram](https://drive.google.com/file/d/1gzuFhhOR7JmASPKYVPKwvyLrUiUHpojA/view?usp=sharing)**.
 
+```mermaid
+flowchart LR
+s1[Sensor]
+s2[Sensor]
+s3[Sensor]
+dc("Cloud data system (Datacake)")
+wf["Workflow orchestrator (Airflow)"]
+sql[("SQL Database (PostgreSQL)")]
+gd["Metadata registry (Google Sheets)"]
+
+s1 --> dc
+s2 --> dc
+s3 --> dc
+dc --> wf
+gd --> wf
+wf --> sql
+```
+
 The system comprises two major parts:
 
 * **Workflow Orchestrator:** The data pipelines are implemented using a workflow orchestrator called [Apache Airflow](https://airflow.apache.org/).
