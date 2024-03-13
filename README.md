@@ -16,7 +16,7 @@ For an overview, see this blog post "[Supporting airborne infection research wit
 
 ## Architecture
 
-There is an **overview of the system in the [architecture diagram](https://drive.google.com/file/d/1gzuFhhOR7JmASPKYVPKwvyLrUiUHpojA/view?usp=sharing)**.
+There is an overview of the system in the [architecture diagram](https://drive.google.com/file/d/1gzuFhhOR7JmASPKYVPKwvyLrUiUHpojA/view?usp=sharing).
 
 ```mermaid
 flowchart LR
@@ -49,6 +49,38 @@ There are three typical user roles:
 * End user (researcher) will access the SQL database using a certain security role.
 * Data engineer will access the workflow orchestrator using its web portal.
 * A system administrator will access the virtual machine(s) on which the system runs.
+
+This is a more detailed diagram of the different services and the infrastructure they run on.
+
+```mermaid
+flowchart LR
+sheets
+datacake
+subgraph "Campus network"
+    subgraph "Virtual machine 1"
+    web["Administration tool"]
+    sched["Scheduler"]
+    backend[("Result backend")]
+    broker[("Message broker")]
+    end
+    subgraph "Virtual machine 2"
+    worker["Worker(s)"]
+    end
+    subgraph "Virtual machine 3"
+    db[("PostgreSQL database")]
+    dbadmin["Database administration tool"]
+    end
+end
+
+web <--> sched
+sched <--> broker
+broker <--> worker
+backend <--> worker
+worker --> db
+dbadmin <--> db
+sheets --> worker
+datacake --> worker
+```
 
 ## Workflow orchestrator
 
