@@ -12,6 +12,8 @@ This repository contains an Ansible project as described below.
 
 For an overview, see this blog post "[Supporting airborne infection research with data engineering](https://casestudiesrcg.blogspot.com/2021/11/supporting-airborne-infection-research.html)" by the Research & Innovation IT team in IT Services at the University of Sheffield.
 
+The prototype of this system is in [rcgsheffield/ventilation-for-hospitality](https://github.com/rcgsheffield/ventilation-for-hospitality).
+
 # Overview
 
 ## Architecture
