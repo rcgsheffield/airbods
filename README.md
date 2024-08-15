@@ -120,6 +120,26 @@ You may need to [install Ansible in a Python virtual environment](https://docs.a
 source ~/ansible/bin/activate
 ```
 
+## Secrets
+
+The secret passwords used by each subsystem are defined in local files in the `./secrets` directory, which isn't included in this repository for security reasons.
+
+The `secrets/variables.json` file contains the [fernet key](https://airflow.apache.org/docs/apache-airflow/stable/security/secrets/fernet.html) used for encryption of passwords by Airflow. This file looks like this, where the Fernet key may be generated using the Python code snippet below.
+
+```json
+{
+  "fernet_key": "********************"
+}
+```
+
+To generate a Fernet key:
+
+```python
+import cryptography.fernet
+fernet_key = cryptography.fernet.Fernet.generate_key()
+print(fernet_key.decode())
+```
+
 ## Key generation
 
 Security keys, certificate requests and certificates may be generated using `openssl`. Certificate-authority-signed certificates were retrieved via ITS Helpdesk. This is particularly important for the SQL database because this service will be exposed to the risks associated with access via the public internet.
@@ -213,8 +233,6 @@ ansible --inventory $INVENTORY --user $USER -a "echo OK" all
 
 To run the deployment script, we need to use the deployment script which is defined as an Ansible "playbook" using the `ansible-playbook` command (see [ansible-playbook CLI docs](https://docs.ansible.com/ansible/latest/cli/ansible-playbook.html)).
 
-The secret passwords used by each subsystem are defined in local files in the `./secrets` directory, which isn't included in this repository for security reasons.
-
 The `--inventory` option determines which [inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html) of hosts will be targeted, where `hosts.yaml` contains the development environment and `hosts-prod.yaml` points to the production environment. You need to use a different inventory file which will point the deployment script to a different machine using the `--inventory` argument of the `ansible-playbook` command.
 
 ```bash
@@ -225,7 +243,7 @@ ansible-playbook --version
 ansible-playbook --inventory $INVENTORY --user $USER --ask-become-pass airbods.yaml --check
 ```
 
-Install services (inside the selected environment):
+Install services (inside the selected environment) which assumes that all the secret password files have been created in the `./secrets` directory.
 
 ```bash
 ansible-playbook --inventory $INVENTORY --user $USER --ask-become-pass airbods.yaml
