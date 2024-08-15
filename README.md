@@ -213,6 +213,8 @@ ansible --inventory $INVENTORY --user $USER -a "echo OK" all
 
 To run the deployment script, we need to use the deployment script which is defined as an Ansible "playbook" using the `ansible-playbook` command (see [ansible-playbook CLI docs](https://docs.ansible.com/ansible/latest/cli/ansible-playbook.html)).
 
+The secret passwords used by each subsystem are defined in local files in the `./secrets` directory, which isn't included in this repository for security reasons.
+
 The `--inventory` option determines which [inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html) of hosts will be targeted, where `hosts.yaml` contains the development environment and `hosts-prod.yaml` points to the production environment. You need to use a different inventory file which will point the deployment script to a different machine using the `--inventory` argument of the `ansible-playbook` command.
 
 ```bash
@@ -245,6 +247,7 @@ If problems occur, check the logs and try the following steps:
 * Ensure that the Ansible [notify handler](https://docs.ansible.com/ansible/latest/user_guide/playbooks_handlers.html) feature is enabled for any changes you may have have made.
 * Restart the services on the remote host (or perhaps reboot the entire remote system manually)
 * Use Ansible's verbose mode and other [debugging features](https://docs.ansible.com/ansible/latest/user_guide/playbooks_debugger.html)
+* If you encounter a "file not found" error, it may be due to a missing secrets file which should be saved in the `./secrets/` directory and contain a random password.
 
 ### Scaling
 
